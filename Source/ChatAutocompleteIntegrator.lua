@@ -23,7 +23,7 @@ function ChatAutocompleteIntegrator.New(itemBrowser)
 
   self.activeEditBox = nil
   self.bindings = {
-    onClickItem = util.Bind(self, self._OnClickItem),
+    onMenuClickItem = util.Bind(self, self._OnMenuClickItem),
     onChatArrowPressed = util.Bind(self, self._OnChatArrowPressed),
     onChatTextChanged = util.Bind(self, self._OnChatTextChanged),
     hookChatEnterPressed = util.Bind(self, self._HookChatEnterPressed),
@@ -61,7 +61,7 @@ end
 -- Private methods
 ------------------------------------------
 
-function ChatAutocompleteIntegrator:_OnClickItem(item)
+function ChatAutocompleteIntegrator:_OnMenuClickItem(item)
   local editBox = self.activeEditBox
   local cursorPosition = editBox:GetCursorPosition()
 
@@ -96,7 +96,7 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
       text = item.link,
       value = item,
       onTooltipShow = function(tooltip) tooltip:SetHyperlink(item.link) end,
-      onClick = self.bindings.onClickItem,
+      onClick = self.bindings.onMenuClickItem,
     })
   end
 
@@ -105,7 +105,7 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
     return
   end
 
-  -- If the menu is not shown, some display initialization is required
+  -- If the menu is not shown, initialize display settings
   if not self.buttonMenu:IsShown() then
     if not self.hookedEditBoxes[editBox] then
       editBox:HookScript('OnArrowPressed', self.bindings.onChatArrowPressed)
@@ -116,7 +116,7 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
     -- not account for potential scrolling inside the edit box)
     local width = editBox:GetSize()
     local left, padding = editBox:GetTextInsets()
-    local stringWidth = self:_GetChatStringWidth(activeText:sub(1, startIndex - 1))
+    local stringWidth = self:_GetEditBoxStringWidth(activeText:sub(1, startIndex - 1))
     local offsetX = math.min(left + stringWidth, width - padding * 2)
 
     -- TODO: Support chat in different corners?
@@ -138,7 +138,7 @@ end
 
 function ChatAutocompleteIntegrator:_HookChatEnterPressed(editBox)
   if self.buttonMenu:IsShown() then
-    self:_OnClickItem(self.buttonMenu:GetSelection())
+    self:_OnMenuClickItem(self.buttonMenu:GetSelection())
     return true
   end
 
@@ -175,7 +175,7 @@ function ChatAutocompleteIntegrator:_ExtractSearchTerm(text)
   end
 end
 
-function ChatAutocompleteIntegrator:_GetChatStringWidth(text)
+function ChatAutocompleteIntegrator:_GetEditBoxStringWidth(text)
   if self.dummyTestString == nil then
     -- Assume each edit box use the same font
     local font, size, type = self.activeEditBox:GetFont()
