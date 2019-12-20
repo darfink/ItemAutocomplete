@@ -66,3 +66,20 @@ end
 function export.IsNilOrEmpty(string)
   return string == nil or string == ''
 end
+
+-- Returns the binary insertion point for a value in a sorted array
+function export.BinaryInsertionPoint(table, value, comparator)
+  local lower, upper, mid, state = 1, #table, 1, 0
+
+  while lower <= upper do
+      mid = math.floor((lower + upper) / 2)
+
+      if comparator(value, table[mid]) then
+        upper, state = mid - 1, 0
+      else
+        lower, state = mid + 1, 1
+      end
+  end
+
+  return mid + state
+end

@@ -26,6 +26,7 @@ function ItemBrowser.New(persistence, itemDatabase)
 
   self.itemWeights = persistence:GetGlobalItem('itemWeights')
   self.itemDatabase = itemDatabase
+  self.fnCompareItems = util.Bind(self, ItemBrowser._CompareItems)
   return self
 end
 
@@ -40,15 +41,16 @@ function ItemBrowser:FindItems(text, limit)
   -- TODO: Implement smart casing
   for itemId, item in self.itemDatabase:ItemIterator() do
     if string.find(item.name:lower(), needle) then
-      foundItems[#foundItems + 1] = item
+      local insertionPoint = util.BinaryInsertionPoint(foundItems, item, self.fnCompareItems)
+
+      if insertionPoint < limit then
+        table.insert(foundItems, insertionPoint, item)
+
+        if #foundItems > limit then
+          foundItems[#foundItems] = nil
+        end
+      end
     end
-  end
-
-  table.sort(foundItems, util.Bind(self, ItemBrowser._CompareItems))
-
-  -- TODO: Implement limit properly
-  if limit ~= nil then
-    foundItems[limit + 1] = nil
   end
 
   return util.Values(foundItems)
