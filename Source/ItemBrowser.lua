@@ -1,31 +1,28 @@
-select(2, ...) 'ItemCompleter'
+select(2, ...) 'ItemBrowser'
 
 -- Imports
 local util = require 'Utility.Functions'
 
-------------------------------------------
--- Class definition
-------------------------------------------
-
-local ItemCompleter = {}
-ItemCompleter.__index = ItemCompleter
-
-------------------------------------------
--- Constants
-------------------------------------------
-
+-- Consts
 local const = {
   itemStartWeight = 10,
   itemIncrementWeight = 10,
 }
 
 ------------------------------------------
+-- Class definition
+------------------------------------------
+
+local ItemBrowser = {}
+ItemBrowser.__index = ItemBrowser
+
+------------------------------------------
 -- Constructor
 ------------------------------------------
 
--- Creates a new item database
-function ItemCompleter.New(persistence, itemDatabase)
-  local self = setmetatable({}, ItemCompleter)
+-- Creates a new item browser
+function ItemBrowser.New(persistence, itemDatabase)
+  local self = setmetatable({}, ItemBrowser)
 
   self.itemWeights = persistence:GetGlobalItem('itemWeights')
   self.itemDatabase = itemDatabase
@@ -36,7 +33,7 @@ end
 -- Public methods
 ------------------------------------------
 
-function ItemCompleter:FindItems(text)
+function ItemBrowser:FindItems(text, limit)
   local foundItems = {}
   local needle = text:lower()
 
@@ -47,11 +44,17 @@ function ItemCompleter:FindItems(text)
     end
   end
 
-  table.sort(foundItems, util.Bind(self, ItemCompleter._CompareItems))
+  table.sort(foundItems, util.Bind(self, ItemBrowser._CompareItems))
+
+  -- TODO: Implement limit properly
+  if limit ~= nil then
+    foundItems[limit + 1] = nil
+  end
+
   return util.Values(foundItems)
 end
 
-function ItemCompleter:SelectItem(itemId)
+function ItemBrowser:SelectItem(itemId)
   self.itemWeights[itemId] = math.sqrt(
     math.pow(self.itemWeights[itemId] or const.itemStartWeight, 2) +
     math.pow(const.itemIncrementWeight, 2))
@@ -61,7 +64,7 @@ end
 -- Private methods
 ------------------------------------------
 
-function ItemCompleter:_CompareItems(itemA, itemB)
+function ItemBrowser:_CompareItems(itemA, itemB)
   local itemWeightA = self.itemWeights[itemA.id] or const.itemStartWeight
   local itemWeightB = self.itemWeights[itemB.id] or const.itemStartWeight
 
@@ -77,4 +80,4 @@ end
 -- Exports
 ------------------------------------------
 
-export.New = function(...) return ItemCompleter.New(...) end
+export.New = function(...) return ItemBrowser.New(...) end

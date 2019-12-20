@@ -17,6 +17,8 @@ end
 
 -- Binds one argument to a function
 function export.Bind(context, callee)
+  assert(type(callee) == 'function', 'Callee must be a function')
+
   return function(...)
     return callee(context, ...)
   end
@@ -47,8 +49,20 @@ function export.RegisterSlashCommand(command, callback)
   _G.SlashCmdList[identifier] = callback
 end
 
--- Returns a table's values
+-- Returns an iterator of a table's values
 function export.Values(table)
   local i = 0
   return function() i = i + 1; return table[i] end
+end
+
+-- Hooks a global function and returns the original
+function export.Hook(fn, detour)
+  local original = _G[fn]
+  _G[fn] = detour
+  return original
+end
+
+-- Returns whether a string is nil or empty
+function export.IsNilOrEmpty(string)
+  return string == nil or string == ''
 end

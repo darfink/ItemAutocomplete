@@ -3,23 +3,19 @@ select(2, ...) 'ItemDatabase'
 -- Imports
 local util = require 'Utility.Functions'
 
+-- Consts
+local const = {
+  -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
+  highestItemId = 24283,
+  itemsAddedPerUpdate = 50,
+}
+
 ------------------------------------------
 -- Class definition
 ------------------------------------------
 
 local ItemDatabase = {}
 ItemDatabase.__index = ItemDatabase
-
-------------------------------------------
--- Constants
-------------------------------------------
-
--- TODO: Make read only!
-local const = {
-  -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
-  highestItemId = 24283,
-  itemsAddedPerUpdate = 50,
-}
 
 ------------------------------------------
 -- Constructor
@@ -57,6 +53,10 @@ function ItemDatabase:AddItemById(itemId)
   else
     return false
   end
+end
+
+function ItemDatabase:GetItemById(itemId)
+  return self.itemsById[itemId]
 end
 
 function ItemDatabase:ItemIterator()
