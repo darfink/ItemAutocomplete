@@ -49,12 +49,6 @@ function export.RegisterSlashCommand(command, callback)
   _G.SlashCmdList[identifier] = callback
 end
 
--- Returns an iterator of a table's values
-function export.Values(table)
-  local i = 0
-  return function() i = i + 1; return table[i] end
-end
-
 -- Hooks a global function and returns the original
 function export.Hook(fn, detour)
   local original = _G[fn]
@@ -72,13 +66,13 @@ function export.BinaryInsertionPoint(table, value, comparator)
   local lower, upper, mid, state = 1, #table, 1, 0
 
   while lower <= upper do
-      mid = math.floor((lower + upper) / 2)
+    mid = math.floor((lower + upper) / 2)
 
-      if comparator(value, table[mid]) then
-        upper, state = mid - 1, 0
-      else
-        lower, state = mid + 1, 1
-      end
+    if comparator(value, table[mid]) then
+      upper, state = mid - 1, 0
+    else
+      lower, state = mid + 1, 1
+    end
   end
 
   return mid + state

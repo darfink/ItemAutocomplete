@@ -18,14 +18,16 @@ ChatAutocompleteIntegrator.__index = ChatAutocompleteIntegrator
 ------------------------------------------
 
 -- Creates a chat autocomplete menu
-function ChatAutocompleteIntegrator.New(itemBrowser)
+function ChatAutocompleteIntegrator.New(itemDatabase)
   local self = setmetatable({}, ChatAutocompleteIntegrator)
 
   self.activeEditBox = nil
   self.bindings = {
+    -- TODO: AutoCompleteEditBox_OnEditFocusLost?
     onMenuClickItem = util.Bind(self, self._OnMenuClickItem),
     onChatArrowPressed = util.Bind(self, self._OnChatArrowPressed),
     onChatTextChanged = util.Bind(self, self._OnChatTextChanged),
+    onChatFocusLost = util.Bind(self, self._OnChatFocusLost),
     hookChatEnterPressed = util.Bind(self, self._HookChatEnterPressed),
     hookChatEscapePressed = util.Bind(self, self._HookChatEscapePressed),
     hookChatTabPressed = util.Bind(self, self._HookChatTabPressed),
@@ -35,8 +37,9 @@ function ChatAutocompleteIntegrator.New(itemBrowser)
   self.buttonMenu:SetFrameLevel(10)
   self.buttonMenu:Hide()
   self.dummyTestString = nil
+  self.previousSearchTerm = nil
   self.hookedEditBoxes = {}
-  self.itemBrowser = itemBrowser
+  self.itemDatabase = itemDatabase
   self.itemLinkDelimiters = { string.byte('['), string.byte(']') }
   self.original = {
     autoCompleteEditBoxOnEnterPressed = util.Hook(
@@ -50,6 +53,7 @@ function ChatAutocompleteIntegrator.New(itemBrowser)
       self.bindings.hookChatTabPressed),
   }
 
+  hooksecurefunc('ChatEdit_OnEditFocusLost', self.bindings.onChatFocusLost)
   hooksecurefunc('ChatEdit_OnTextChanged', self.bindings.onChatTextChanged)
 end
 
@@ -88,10 +92,16 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
     return
   end
 
+  -- This event is sometimes triggered twice
+  if searchTerm == self.previousSearchTerm and self.buttonMenu:IsShown() then
+    return
+  end
+
   self.activeEditBox = editBox
+  self.previousSearchTerm = searchTerm
   self.buttonMenu:ClearAll()
 
-  for item in self.itemBrowser:FindItems(searchTerm, const.maxItems) do
+  for item in self.itemDatabase:FindItems(searchTerm, const.maxItems) do
     self.buttonMenu:AddButton({
       text = item.link,
       value = item,
@@ -134,6 +144,10 @@ function ChatAutocompleteIntegrator:_OnChatArrowPressed(editBox, key)
       self.buttonMenu:IncrementSelection(false)
     end
   end
+end
+
+function ChatAutocompleteIntegrator:_OnChatFocusLost(editBox)
+  self.buttonMenu:Hide()
 end
 
 function ChatAutocompleteIntegrator:_HookChatEnterPressed(editBox)

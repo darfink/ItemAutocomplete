@@ -1,6 +1,7 @@
 select(2, ...) 'ItemDatabase'
 
 -- Imports
+local algo = require 'Utility.Algo'
 local util = require 'Utility.Functions'
 
 -- Consts
@@ -61,6 +62,44 @@ end
 
 function ItemDatabase:ItemIterator()
   return pairs(self.itemsById)
+end
+
+function ItemDatabase:FindItems(text, limit)
+  local limit = limit or 1 / 0
+  local foundItems = {}
+  local pattern = text:lower()
+
+  -- The following is a trade-off between execution time & memory. Adding all
+  -- items to an array and sorting afterwards is O(nlogn), but requires a
+  -- complete duplicate of the item database. A heap is good in theory but
+  -- profiling shows it performs worst of all. The used solution is O(n²) due to
+  -- the inner loop being O(n). Using binary search for the insertion point is
+  -- also worse than insertion sort when a low 'limit' is used.
+  for itemId, item in self:ItemIterator() do
+    local startIndex, _, score = algo.FuzzyMatch(item.name, pattern, true)
+
+    if startIndex > 0 then
+      local insertionPoint = #foundItems + 1
+      while insertionPoint > 1 and score > foundItems[insertionPoint - 1].score do
+        insertionPoint = insertionPoint - 1
+      end
+
+      if insertionPoint < limit then
+        table.insert(foundItems, insertionPoint, { item = item, score = score })
+
+        if #foundItems > limit then
+          foundItems[#foundItems] = nil
+        end
+      end
+    end
+  end
+
+  -- Return an iterator over all items found
+  local i = 0
+  return function()
+    i = i + 1;
+    return foundItems[i] and foundItems[i].item
+  end
 end
 
 function ItemDatabase:UpdateItems()

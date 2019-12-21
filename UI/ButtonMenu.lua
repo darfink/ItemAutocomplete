@@ -32,7 +32,7 @@ function ItemAutocompleteButtonMenuOnLoad(self)
 
   function self:GetSelection()
     local selectedButton = self.buttons[self.selectedButtonIndex]
-    return selectedButton and selectedButton.value
+    return selectedButton and selectedButton.info.value
   end
 
   function self:IncrementSelection(decrement)
@@ -58,9 +58,7 @@ function ItemAutocompleteButtonMenuOnLoad(self)
     end
 
     local button = self.buttons[self.buttonCount]
-    button.value = info.value
-    button.onTooltipShow = info.onTooltipShow
-    button:SetScript('OnClick', info.onClick and function() info.onClick(info.value) end)
+    button.info = info
     button:SetText(info.text)
     button:Show()
 
@@ -105,9 +103,9 @@ function ItemAutocompleteButtonMenuOnLoad(self)
     local button = CreateFrame('Button', nil, self, 'ItemAutocompleteButtonTemplate')
 
     button.ShowTooltip = function()
-      if button.onTooltipShow ~= nil then
+      if button.info.onTooltipShow ~= nil then
         GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
-        button.onTooltipShow(GameTooltip)
+        button.info.onTooltipShow(GameTooltip)
       end
     end
 
@@ -124,6 +122,12 @@ function ItemAutocompleteButtonMenuOnLoad(self)
     button:GetFontString():SetPoint('LEFT', button, 'LEFT', 15, 0)
     button:SetScript('OnLeave', function() GameTooltip:Hide() end)
     button:SetScript('OnEnter', button.ShowTooltip)
+    button:SetScript('OnClick', function()
+      if button.info.onClick ~= nil then
+        button.onClick(button.info.value)
+      end
+    end)
+
     return button
   end
 end

@@ -4,7 +4,6 @@ select(2, ...) 'Main'
 local EventSource = require 'Shared.EventSource'
 local Persistence = require 'Shared.Persistence'
 local ItemDatabase = require 'ItemDatabase'
-local ItemBrowser = require 'ItemBrowser'
 local ChatAutocompleteIntegrator = require 'ChatAutocompleteIntegrator'
 local util = require 'Utility.Functions'
 
@@ -21,8 +20,7 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
 
   local persistence = Persistence.New(addonName .. 'DB')
   local itemDatabase = ItemDatabase.New(persistence, eventSource)
-  local itemBrowser = ItemBrowser.New(persistence, itemDatabase)
-  local chatAutocompleteIntegrator = ChatAutocompleteIntegrator.New(itemBrowser)
+  local chatAutocompleteIntegrator = ChatAutocompleteIntegrator.New(itemDatabase)
 
   if itemDatabase:IsEmpty() then
     print('[ItemAutocomplete]: Updating item database')
@@ -30,7 +28,7 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
   end
 
   util.RegisterSlashCommand('gl', function(text)
-    for item in itemBrowser:FindItems(text) do
+    for item in itemDatabase:FindItems(text) do
       print(item.link)
     end
   end)
