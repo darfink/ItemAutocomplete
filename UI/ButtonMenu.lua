@@ -124,7 +124,7 @@ function ItemAutocompleteButtonMenuOnLoad(self)
     button:SetScript('OnEnter', button.ShowTooltip)
     button:SetScript('OnClick', function()
       if button.info.onClick ~= nil then
-        button.onClick(button.info.value)
+        button.info.onClick(button.info.value)
       end
     end)
 
