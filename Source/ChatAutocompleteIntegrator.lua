@@ -23,12 +23,11 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
 
   self.activeEditBox = nil
   self.bindings = {
-    -- TODO: AutoCompleteEditBox_OnEditFocusLost?
     onMenuClickItem = util.Bind(self, self._OnMenuClickItem),
     onChatArrowPressed = util.Bind(self, self._OnChatArrowPressed),
     onChatTextChanged = util.Bind(self, self._OnChatTextChanged),
     onChatFocusLost = util.Bind(self, self._OnChatFocusLost),
-    hookChatEnterPressed = util.Bind(self, self._HookChatEnterPressed),
+    hookChatMessageBeforeSend = util.Bind(self, self._HookChatMessageBeforeSend),
     hookChatEscapePressed = util.Bind(self, self._HookChatEscapePressed),
     hookChatTabPressed = util.Bind(self, self._HookChatTabPressed),
   }
@@ -42,9 +41,9 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
   self.itemDatabase = itemDatabase
   self.itemLinkDelimiters = { string.byte('['), string.byte(']') }
   self.original = {
-    autoCompleteEditBoxOnEnterPressed = util.Hook(
-      'AutoCompleteEditBox_OnEnterPressed',
-      self.bindings.hookChatEnterPressed),
+    substituteChatMessageBeforeSend = util.Hook(
+      'SubstituteChatMessageBeforeSend',
+      self.bindings.hookChatMessageBeforeSend),
     autoCompleteEditBoxOnEscapePressed = util.Hook(
       'AutoCompleteEditBox_OnEscapePressed',
       self.bindings.hookChatEscapePressed),
@@ -115,7 +114,7 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
     return
   end
 
-  -- If the menu is not shown, initialize display settings
+  -- If the menu is not shown, display settings must be configured
   if not self.buttonMenu:IsShown() then
     if not self.hookedEditBoxes[editBox] then
       editBox:HookScript('OnArrowPressed', self.bindings.onChatArrowPressed)
@@ -150,13 +149,20 @@ function ChatAutocompleteIntegrator:_OnChatFocusLost(editBox)
   self.buttonMenu:Hide()
 end
 
-function ChatAutocompleteIntegrator:_HookChatEnterPressed(editBox)
+function ChatAutocompleteIntegrator:_HookChatMessageBeforeSend(text)
   if self.buttonMenu:IsShown() then
+    -- Whilst hooking the 'enter pressed' event seems to be the most obvious, it
+    -- taints the runtime and prevents any secure commands from being executed
+    -- in the chat (e.g. /target). To circumvent this, a function run later in
+    -- the invocation chain is hooked instead - SubstituteChatMessageBeforeSend.
+    -- To actually prevent normal operations, the return value itself is
+    -- irrelevant due to being unused. Instead an error is thrown whilst a
+    -- temporary error handler is set to avoid any user inconvenience.
     self:_OnMenuClickItem(self.buttonMenu:GetSelection())
-    return true
+    util.Abort()
   end
 
-  return self.original.autoCompleteEditBoxOnEnterPressed(editBox)
+  return self.original.substituteChatMessageBeforeSend(text)
 end
 
 function ChatAutocompleteIntegrator:_HookChatEscapePressed(editBox)
