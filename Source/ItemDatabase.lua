@@ -126,7 +126,7 @@ end
 function ItemDatabase:_OnUpdate()
   local upperItemId = min(const.highestItemId, self.currentItemId + const.itemsAddedPerUpdate)
 
-  while self.currentItemId < upperItemId do
+  while self.currentItemId <= upperItemId do
     if C_Item.DoesItemExistByID(self.currentItemId) then
       self:AddItemById(self.currentItemId)
     end
@@ -134,7 +134,7 @@ function ItemDatabase:_OnUpdate()
     self.currentItemId = self.currentItemId + 1
   end
 
-  if self.currentItemId == const.highestItemId then
+  if self.currentItemId > const.highestItemId then
     self.updateFrame:SetScript('OnUpdate', nil)
     self.isUpdating = false
 
