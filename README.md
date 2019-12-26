@@ -2,6 +2,8 @@
 
 This is an autocomplete addon for item links in WoW Classic. It integrates with your chat and is triggered with a single character (default `[`), making every single item in the game a few key strokes away.
 
+![In-game demo](https://i.imgur.com/H70fus7.gif)
+
 ## Features
 
 - **Item database:** It automatically scans the entire item database the first time it starts up, thereafter every single item is accessible. No need to wait for you to encounter it in the world! Perhaps it's time to lookup Ashbringer or Atiesh?
@@ -36,6 +38,6 @@ For interaction, it has the same controls as you'd expect any autocomplete menu 
 
 Not a keyboard person? No worries, just use the mouse.
 
-## Demo
+## Commands
 
-![In-game demo](https://i.imgur.com/H70fus7.gif)
+- `/iaupdate` — Update the item database. If for some reason the item database becomes corrupt or obsolete, you can manually trigger an update with this command.
