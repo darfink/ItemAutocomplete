@@ -26,7 +26,7 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
   self.buttonMenu:SetFrameLevel(10)
   self.fontStringWidthTester = nil
   self.itemDatabase = itemDatabase
-  self.itemLinkDelimiters = { string.byte('<'), string.byte('>') }
+  self.itemLinkDelimiters = { string.byte('['), string.byte(']') }
   self.methods = util.ContextBinder(self)
   self.previousSearchTerm = nil
 
@@ -38,7 +38,7 @@ end
 ------------------------------------------
 
 function ChatAutocompleteIntegrator:Enable()
-  -- These are not actually hooks, rather just listeners
+  -- These are not actual hooks, rather just listeners
   hooksecurefunc('ChatEdit_OnEditFocusLost', self.methods._OnChatFocusLost)
   hooksecurefunc('ChatEdit_OnTextChanged', self.methods._OnChatTextChanged)
 
