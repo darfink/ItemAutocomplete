@@ -1,6 +1,8 @@
 select(2, ...) 'Main'
 
 -- Imports
+local AceConfig = LibStub('AceConfig-3.0')
+local AceConfigDialog = LibStub('AceConfigDialog-3.0')
 local EventSource = require 'Shared.EventSource'
 local Persistence = require 'Shared.Persistence'
 local TaskScheduler = require 'Shared.TaskScheduler'
@@ -24,8 +26,6 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
   local itemDatabase = ItemDatabase.New(persistence, eventSource, taskScheduler)
   local chatAutocompleteIntegrator = ChatAutocompleteIntegrator.New(itemDatabase)
 
-  chatAutocompleteIntegrator:Enable()
-
   local updateItemDatabase = function()
     util.Print('Updating item database')
     itemDatabase:UpdateItemsAsync(function()
@@ -36,6 +36,13 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
   if itemDatabase:IsEmpty() then
     updateItemDatabase()
   end
+
+  local options = persistence:GetGlobalItem('options')
+  local inputs = chatAutocompleteIntegrator:Config(options)
+  chatAutocompleteIntegrator:Enable()
+
+  AceConfig:RegisterOptionsTable(addonName, { type = 'group', args = inputs })
+  AceConfigDialog:AddToBlizOptions(addonName, addonName)
 
   util.RegisterSlashCommand('iaupdate', updateItemDatabase)
 end)

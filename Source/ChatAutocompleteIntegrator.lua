@@ -26,9 +26,9 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
   self.buttonMenu:SetFrameLevel(10)
   self.fontStringWidthTester = nil
   self.itemDatabase = itemDatabase
-  self.itemLinkDelimiters = { string.byte('['), string.byte(']') }
   self.methods = util.ContextBinder(self)
   self.previousSearchTerm = nil
+  self:SetItemLinkDelimiters('[', ']')
 
   return self
 end
@@ -58,6 +58,40 @@ function ChatAutocompleteIntegrator:Enable()
     local editBox = _G['ChatFrame' .. i .. 'EditBox']
     editBox:HookScript('OnArrowPressed', self.methods._OnChatArrowPressed)
   end
+end
+
+function ChatAutocompleteIntegrator:Config(options)
+  options.itemLinkDelimiters = options.itemLinkDelimiters or '[]'
+  self:SetItemLinkDelimiters(
+    options.itemLinkDelimiters:byte(1),
+    options.itemLinkDelimiters:byte(2))
+
+  return {
+    itemLinkDelimiters = {
+      type = 'select',
+      values = {
+        ['<>'] = 'Angle brackets — <>',
+        ['{}'] = 'Curly brackets — {}',
+        ['[]'] = 'Square brackets — []',
+        ['()'] = 'Parentheses — ()',
+      },
+      style = 'dropdown',
+      name = 'Chat item link delimiters',
+      desc = 'Specify the item link delimiters used.',
+      get = function() return options.itemLinkDelimiters end,
+      set = function(_, key)
+        options.itemLinkDelimiters = key
+        self:SetItemLinkDelimiters(key:byte(1), key:byte(2))
+      end,
+    },
+  }
+end
+
+function ChatAutocompleteIntegrator:SetItemLinkDelimiters(open, close)
+  self.itemLinkDelimiters = {
+    type(open) == 'string' and string.byte(open) or open,
+    type(close) == 'string' and string.byte(close) or close,
+  }
 end
 
 ------------------------------------------
