@@ -71,7 +71,7 @@ function export.ReadOnly(table)
     __index = table,
     __newindex = function() error('Attempt to modify read-only table') end,
     __metatable = false
-  });
+  })
 end
 
 -- Returns a table which exposes context bound methods

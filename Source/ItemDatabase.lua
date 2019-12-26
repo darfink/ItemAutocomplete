@@ -165,7 +165,7 @@ function ItemDatabase:_TaskFindItems(text, limit, itemsPerYield)
   -- Return an iterator over all items found
   local i = 0
   return function()
-    i = i + 1;
+    i = i + 1
     return foundItems[i] and foundItems[i].item
   end
 end
