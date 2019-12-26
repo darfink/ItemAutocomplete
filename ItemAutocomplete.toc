@@ -10,6 +10,7 @@ Libs\Libs.xml
 # Addon
 Ui\ButtonMenu.lua
 Ui\ButtonMenu.xml
+Ui\Configuration.xml
 Source\Shared\EventSource.lua
 Source\Shared\Persistence.lua
 Source\Shared\TaskScheduler.lua

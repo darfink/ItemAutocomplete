@@ -1,0 +1,36 @@
+<Ui
+  xmlns="http://www.blizzard.com/wow/ui/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+    http://www.blizzard.com/wow/ui/
+    https://raw.githubusercontent.com/dubcat/wow-ui-source/master/FrameXML/ui.xsd"
+>
+  <Frame name="ItemAutocompleteConfiguration" parent="InterfaceOptionsFramePanelContainer">
+    <Scripts>
+      <OnLoad>
+        self.name = 'ItemAutocomplete'
+        InterfaceOptions_AddCategory(self)
+      </OnLoad>
+    </Scripts>
+
+    <Frames>
+      <CheckButton inherits="UICheckButtonTemplate">
+        <Size x="24" y="24" />
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="0" y="0" />
+            </Offset>
+          </Anchor>
+        </Anchors>
+
+        <Scripts>
+          <OnLoad>
+            self.text:SetFontObject(GameFontNormal);
+            self.text:SetText('Use angle brackets (&lt;)');
+          </OnLoad>
+        </Scripts>
+      </CheckButton>
+    </Frames>
+  </Frame>
+</Ui>
