@@ -43,3 +43,7 @@ Not a keyboard person? No worries, just use the mouse.
 ## Commands
 
 - `/iaupdate` — Update the item database. If for some reason the item database becomes corrupt or obsolete, you can manually trigger an update with this command.
+
+## Languages other than English
+
+Due to the scarce amount of UTF-8 compatible APIs accessible for addons, only English clients are supported at this time.
