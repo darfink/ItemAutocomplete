@@ -10,7 +10,7 @@ This is an autocomplete addon for item links in WoW Classic. It integrates with 
 
 - **Chat integration:** Whilst composing a message, just input your trigger character (default <kbd>[</kbd>) and start searching for whatever item you want to link. When you've find your item, just press <kbd>↵ Enter</kbd> to insert the link.
 
-- **Fuzzy search:** Never spell out an entire item name! And find items with blazing speed. The fuzzy search ensures you only need to write a small portion of any item before it pops up in the menu.
+- **Fuzzy search:** Never spell out an entire item name! And find items with blazing speed. The fuzzy search ensures you only need to write a small portion of an item before it pops up in the menu.
 
 **TIP** Another feature if you're using an auction house addon is the ability to look up item tooltips, making it easy to view any item's price tag whilst out travelling in the world.
 
