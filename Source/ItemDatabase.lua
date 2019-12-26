@@ -5,11 +5,13 @@ local algo = require 'Utility.Algo'
 local util = require 'Utility.Functions'
 
 -- Consts
-local const = {
+local const = util.ReadOnly({
   -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
+  disjunctItemIds = {172070},
   highestItemId = 24283,
-  itemsAddedPerUpdate = 50,
-}
+  itemsQueriedPerUpdate = 50,
+  itemsSearchedPerUpdate = 1000,
+})
 
 ------------------------------------------
 -- Class definition
@@ -23,14 +25,14 @@ ItemDatabase.__index = ItemDatabase
 ------------------------------------------
 
 -- Creates a new item database
-function ItemDatabase.New(persistence, eventSource)
+function ItemDatabase.New(persistence, eventSource, taskScheduler)
   local self = setmetatable({}, ItemDatabase)
 
-  self.itemsById = persistence:GetGlobalItem('itemDatabase')
-  self.isUpdating = false
-  self.updateFrame = CreateFrame('Frame')
+  self.methods = util.ContextBinder(self)
   self.eventSource = eventSource
-  self.eventSource:AddListener('GET_ITEM_INFO_RECEIVED', util.Bind(self, self._OnItemInfoReceived))
+  self.eventSource:AddListener('GET_ITEM_INFO_RECEIVED', self.methods._OnItemInfoReceived)
+  self.itemsById = persistence:GetGlobalItem('itemDatabase')
+  self.taskScheduler = taskScheduler
 
   return self
 end
@@ -60,14 +62,75 @@ function ItemDatabase:GetItemById(itemId)
   return self.itemsById[itemId]
 end
 
+function ItemDatabase:FindItemsAsync(text, limit, callback)
+  -- Only one item query may be running at a time, therefore replace any
+  -- scheduled task since the result will most likely be obsolete when it's
+  -- complete.
+  self.taskScheduler:Dequeue(self.findItemsTaskId)
+
+  self.findItemsTaskId = self.taskScheduler:Queue({
+    onFinish = callback,
+    task = function() return self:_TaskFindItems(text, limit, const.itemsSearchedPerUpdate) end,
+  })
+end
+
+function ItemDatabase:UpdateItemsAsync(callback)
+  if self:IsUpdating() then
+    return
+  end
+
+  for _, itemId in ipairs(const.disjunctItemIds) do
+    self:AddItemById(itemId)
+  end
+
+  self.updateItemsTaskId = self.taskScheduler:Queue({
+    onFinish = callback,
+    task = function() return self:_TaskUpdateItems(const.itemsQueriedPerUpdate) end,
+  })
+end
+
+function ItemDatabase:IsEmpty()
+  for _ in pairs(self.itemsById) do return false end
+  return true
+end
+
+function ItemDatabase:IsUpdating()
+  return self.taskScheduler:IsScheduled(self.updateItemsTaskId)
+end
+
 function ItemDatabase:ItemIterator()
   return pairs(self.itemsById)
 end
 
-function ItemDatabase:FindItems(text, limit)
+------------------------------------------
+-- Private methods
+------------------------------------------
+
+function ItemDatabase:_OnItemInfoReceived(itemId, success)
+  if success then
+    self:AddItemById(itemId)
+  end
+end
+
+function ItemDatabase:_TaskUpdateItems(itemsPerYield)
+  for itemId = 1, const.highestItemId do
+    if C_Item.DoesItemExistByID(itemId) then
+      self:AddItemById(itemId)
+    end
+
+    if itemId % itemsPerYield == 0 then
+      coroutine.yield(itemId / const.highestItemId)
+    end
+  end
+
+  return 1
+end
+
+function ItemDatabase:_TaskFindItems(text, limit, itemsPerYield)
   local limit = limit or 1 / 0
   local foundItems = {}
   local pattern = text:lower()
+  local iterations = 0
 
   -- The following is a trade-off between execution time & memory. Adding all
   -- items to an array and sorting afterwards is O(nlogn), but requires a
@@ -78,7 +141,7 @@ function ItemDatabase:FindItems(text, limit)
   for itemId, item in self:ItemIterator() do
     local startIndex, _, score = algo.FuzzyMatch(item.name, pattern, true)
 
-    if startIndex > 0 then
+    if startIndex ~= 0 then
       local insertionPoint = #foundItems + 1
       while insertionPoint > 1 and score > foundItems[insertionPoint - 1].score do
         insertionPoint = insertionPoint - 1
@@ -92,6 +155,11 @@ function ItemDatabase:FindItems(text, limit)
         end
       end
     end
+
+    iterations = iterations + 1
+    if iterations % itemsPerYield == 0 then
+      coroutine.yield()
+    end
   end
 
   -- Return an iterator over all items found
@@ -99,53 +167,6 @@ function ItemDatabase:FindItems(text, limit)
   return function()
     i = i + 1;
     return foundItems[i] and foundItems[i].item
-  end
-end
-
-function ItemDatabase:UpdateItems()
-  if self.isUpdating then return end
-
-  self.isUpdating = true
-  self.currentItemId = 1
-  self.updateFrame:SetScript('OnUpdate', util.Bind(self, self._OnUpdate))
-end
-
-function ItemDatabase:IsEmpty()
-  for _ in pairs(self.itemsById) do return false end
-  return true
-end
-
-function ItemDatabase:IsUpdating()
-  return self.isUpdating
-end
-
-------------------------------------------
--- Private methods
-------------------------------------------
-
-function ItemDatabase:_OnUpdate()
-  local upperItemId = min(const.highestItemId, self.currentItemId + const.itemsAddedPerUpdate)
-
-  while self.currentItemId <= upperItemId do
-    if C_Item.DoesItemExistByID(self.currentItemId) then
-      self:AddItemById(self.currentItemId)
-    end
-
-    self.currentItemId = self.currentItemId + 1
-  end
-
-  if self.currentItemId > const.highestItemId then
-    self.updateFrame:SetScript('OnUpdate', nil)
-    self.isUpdating = false
-
-    -- TODO: Move this to event listener
-    print('[ItemAutocomplete]: The database has been updated.')
-  end
-end
-
-function ItemDatabase:_OnItemInfoReceived(itemId, success)
-  if success then
-    self:AddItemById(itemId)
   end
 end
 

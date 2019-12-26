@@ -14,9 +14,11 @@ EventSource.__index = EventSource
 -- Creates a new event source
 function EventSource.New(frame)
   local self = setmetatable({}, EventSource)
+
   self.frame = frame or CreateFrame('Frame')
   self.frame:SetScript('OnEvent', function (_, event, ...) self:_OnEvent(event, ...) end)
   self.eventListeners = {}
+
   return self
 end
 

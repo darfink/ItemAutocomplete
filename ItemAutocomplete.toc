@@ -12,6 +12,7 @@ UI\ButtonMenu.lua
 UI\ButtonMenu.xml
 Source\Shared\EventSource.lua
 Source\Shared\Persistence.lua
+Source\Shared\TaskScheduler.lua
 Source\Utility\Algo.lua
 Source\Utility\Functions.lua
 Source\ChatAutocompleteIntegrator.lua

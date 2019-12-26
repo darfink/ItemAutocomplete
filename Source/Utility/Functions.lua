@@ -15,15 +15,6 @@ function export.GetAddonName()
   return addonName
 end
 
--- Binds one argument to a function
-function export.Bind(context, callee)
-  assert(type(callee) == 'function', 'Callee must be a function')
-
-  return function(...)
-    return callee(context, ...)
-  end
-end
-
 -- Dumps a value to console
 function Dump(table, indent)
   if not indent then indent = 0 end
@@ -63,24 +54,40 @@ function export.Abort()
   error('ABORT')
 end
 
--- Returns whether a string is nil or empty
+-- Returns true if a string is nil or empty
 function export.IsNilOrEmpty(string)
   return string == nil or string == ''
 end
 
--- Returns the binary insertion point for a value in a sorted array
-function export.BinaryInsertionPoint(table, value, comparator)
-  local lower, upper, mid, state = 1, #table, 1, 0
+-- Returns a read only version of a table
+function export.ReadOnly(table)
+  return setmetatable({}, {
+    __index = table,
+    __newindex = function() error('Attempt to modify read-only table') end,
+    __metatable = false
+  });
+end
 
-  while lower <= upper do
-    mid = math.floor((lower + upper) / 2)
+-- Returns a table which exposes context bound methods
+function export.ContextBinder(context)
+  local fnCache = {}
 
-    if comparator(value, table[mid]) then
-      upper, state = mid - 1, 0
-    else
-      lower, state = mid + 1, 1
-    end
-  end
+  return setmetatable({}, {
+    __index = function (_, key)
+      if fnCache[key] == nil then
+        local method = context[key]
 
-  return mid + state
+        if type(method) ~= 'function' then
+          error('Unknown method ' .. key)
+        end
+
+        fnCache[key] = function(...)
+          return method(context, ...)
+        end
+      end
+
+      return fnCache[key]
+    end,
+    __metatable = false,
+  })
 end

@@ -13,6 +13,8 @@ Persistence.__index = Persistence
 
 -- Returns the singleton persistence object
 function Persistence.New(persistentTableName)
+  assert(type(persistentTableName) == 'string')
+
   _G[persistentTableName] = _G[persistentTableName] or { items = {}, realms = {} }
   local persistentTable = _G[persistentTableName]
 
