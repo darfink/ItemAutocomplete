@@ -15,6 +15,12 @@ function export.GetAddonName()
   return addonName
 end
 
+-- Prints an addon message to the default chat frame
+function export.Print(message)
+  local message = string.format('|cFFFFA500[%s]|r: %s', addonName, message)
+  DEFAULT_CHAT_FRAME:AddMessage(message)
+end
+
 -- Dumps a value to console
 function Dump(table, indent)
   if not indent then indent = 0 end
