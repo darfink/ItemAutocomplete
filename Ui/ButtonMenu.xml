@@ -40,7 +40,7 @@
 
     <Layers>
       <Layer level="ARTWORK">
-        <FontString name="wasabi" inherits="GameFontDisableSmall" text="PRESS_TAB">
+        <FontString inherits="GameFontDisableSmall" text="PRESS_TAB">
           <Anchors>
             <Anchor point="BOTTOMLEFT">
               <Offset x="15" y="10" />
