@@ -8,7 +8,7 @@ This is an autocomplete addon for item links in WoW Classic. It integrates with 
 
 - **Item database:** It automatically scans the entire item database the first time it starts up, thereafter every single item is accessible. No need to wait for you to encounter it in the world! Perhaps it's time to lookup Ashbringer or Atiesh?
 
-- **Chat integration:** Whilst composing a message, just input your trigger character (default <kbd>[</kbd>) and start typing whatever item you want to link. When you've find your item, just press <kbd>↵ Enter</kbd> to insert the link.
+- **Chat integration:** Whilst composing a message, just input your trigger character (default <kbd>[</kbd>) and start searching for whatever item you want to link. When you've find your item, just press <kbd>↵ Enter</kbd> to insert the link.
 
 - **Fuzzy search:** Never spell out an entire item name! And find items with blazing speed. The fuzzy search ensures you only need to write a small portion of any item before it pops up in the menu.
 
@@ -18,13 +18,15 @@ This is an autocomplete addon for item links in WoW Classic. It integrates with 
 
 To actually showcase how great the fuzzy search is, here's some examples:
 
-- <kbd>[devga</kbd> → [Devilsaur Gauntlets]
-- <kbd>[robvoi</kbd> → [Robe of the Void]
-- <kbd>[perbl</kbd> → [Perdition's Blade]
-- <kbd>[sulr</kbd> → [Sulfuras, Hand of Ragnaros]
-- <kbd>[hiwi</kbd> → [Hide of the Wild]
+| Input              |   | Item                         |
+| ------------------ | - | :--------------------------- |
+| <kbd>[devga</kbd>  | → | [Devilsaur Gauntlets]        |
+| <kbd>[robvoi</kbd> | → | [Robe of the Void]           |
+| <kbd>[perbl</kbd>  | → | [Perdition's Blade]          |
+| <kbd>[sulr</kbd>   | → | [Sulfuras, Hand of Ragnaros] |
+| <kbd>[hiwi</kbd>   | → | [Hide of the Wild]           |
 
-**TIP** Avoid using <kbd>Space</kbd> when searching; in general it's much faster just to type parts of each word in an item name.
+**TIP** Avoid using <kbd>Space</kbd> when searching; in general it's much faster just to type parts of each word of an item name.
 
 ## Controls
 
