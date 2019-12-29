@@ -126,11 +126,13 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
   return 1
 end
 
-function ItemDatabase:_TaskFindItems(text, limit, itemsPerYield)
+function ItemDatabase:_TaskFindItems(pattern, limit, itemsPerYield)
   local limit = limit or 1 / 0
   local foundItems = {}
-  local pattern = text:lower()
   local iterations = 0
+
+  -- Use smart case (i.e only check casing if the pattern contains uppercase letters)
+  local caseInsensitive = not pattern:find('%u')
 
   -- The following is a trade-off between execution time & memory. Adding all
   -- items to an array and sorting afterwards is O(nlogn), but requires a
@@ -139,7 +141,7 @@ function ItemDatabase:_TaskFindItems(text, limit, itemsPerYield)
   -- the inner loop being O(n). Using binary search for the insertion point is
   -- also worse than insertion sort when a low 'limit' is used.
   for itemId, item in self:ItemIterator() do
-    local startIndex, _, score = algo.FuzzyMatch(item.name, pattern, true)
+    local startIndex, _, score = algo.FuzzyMatch(item.name, pattern, caseInsensitive)
 
     if startIndex ~= 0 then
       local insertionPoint = #foundItems + 1
