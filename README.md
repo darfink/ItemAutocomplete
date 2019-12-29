@@ -14,7 +14,7 @@ This is an autocomplete addon for item links in WoW Classic. It integrates with 
 
 - **Smart case:** All searches are case insensitive by default unless you explicitly use one or more uppercase letters, allowing intelligent and effortless browsing.
 
-**TIP** Another feature if you're using an auction house addon is the ability to look up item tooltips, making it easy to view an item's price tag whilst out travelling in the world.
+**TIP** If you're using an auction house addon you can easily view an item's price tag whilst out travelling, just search for it and view its tooltip.
 
 ### Fuzzy search
 
@@ -27,6 +27,7 @@ To actually showcase how great the fuzzy search is, here's some examples:
 | <kbd>[perbl</kbd>  | → | [Perdition's Blade]          |
 | <kbd>[sulr</kbd>   | → | [Sulfuras, Hand of Ragnaros] |
 | <kbd>[hiwi</kbd>   | → | [Hide of the Wild]           |
+| <kbd>[BNM</kbd>    | → | [Blade of the New Moon]      |
 
 **TIP** Avoid using <kbd>Space</kbd> when searching; in general it's much faster just to type parts of each word of an item name.
 
