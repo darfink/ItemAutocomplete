@@ -17,6 +17,7 @@ local bonusNonWord = scoreMatch / 2
 local bonusCamel123 = bonusBoundary + scoreGapExtention
 local bonusConsecutive = -(scoreGapStart + scoreGapExtention)
 local bonusFirstCharMultiplier = 2
+local bonusExactMatch = scoreMatch
 
 local function IsLowerCaseLetter(char) return char >= 97 and char <= 122 end
 local function IsUpperCaseLetter(char) return char >= 65 and char <= 90 end
@@ -95,6 +96,10 @@ local function EvaluateBonus(caseInsensitive, text, pattern, sidx, eidx)
       firstBonus = 0
     end
     prevClass = class
+  end
+
+  if consecutive == #text then
+    score = score + bonusExactMatch
   end
 
   return score
