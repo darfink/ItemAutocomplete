@@ -37,7 +37,7 @@ end
 ------------------------------------------
 
 -- Gets a persistent entry for all realms
-function Persistence:GetGlobalItem(entryName, defaultValue)
+function Persistence:GetAccountItem(entryName, defaultValue)
   assert(entryName ~= nil)
   if self.persistentTable.items[entryName] == nil then
     self.persistentTable.items[entryName] = defaultValue or {}

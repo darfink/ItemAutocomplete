@@ -37,7 +37,7 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
     updateItemDatabase()
   end
 
-  local options = persistence:GetGlobalItem('options')
+  local options = persistence:GetAccountItem('options')
   local inputs = chatAutocompleteIntegrator:Config(options)
   chatAutocompleteIntegrator:Enable()
 

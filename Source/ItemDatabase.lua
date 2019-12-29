@@ -31,7 +31,7 @@ function ItemDatabase.New(persistence, eventSource, taskScheduler)
   self.methods = util.ContextBinder(self)
   self.eventSource = eventSource
   self.eventSource:AddListener('GET_ITEM_INFO_RECEIVED', self.methods._OnItemInfoReceived)
-  self.itemsById = persistence:GetGlobalItem('itemDatabase')
+  self.itemsById = persistence:GetAccountItem('itemDatabase')
   self.taskScheduler = taskScheduler
 
   return self
