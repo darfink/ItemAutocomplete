@@ -12,6 +12,8 @@ This is an autocomplete addon for item links in WoW Classic. It integrates with 
 
 - **Fuzzy search:** Never spell out an entire item name! And find items with blazing speed. The fuzzy search ensures you only need to write a small portion of an item before it pops up in the menu.
 
+- **Smart case:** All searches are case insensitive by default unless you explicitly use one or more uppercase letters, allowing intelligent and effortless browsing.
+
 **TIP** Another feature if you're using an auction house addon is the ability to look up item tooltips, making it easy to view an item's price tag whilst out travelling in the world.
 
 ### Fuzzy search
