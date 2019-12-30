@@ -24,10 +24,10 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
   self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
   self.buttonMenu:Hide()
   self.buttonMenu:SetFrameLevel(10)
-  self.fontStringWidthTester = nil
+  self.editBoxCursorOffsets = {}
   self.itemDatabase = itemDatabase
   self.methods = util.ContextBinder(self)
-  self.previousSearchTerm = nil
+  self.searchCursorOffsetX = nil
   self:SetItemLinkDelimiters('[', ']')
 
   return self
@@ -57,6 +57,7 @@ function ChatAutocompleteIntegrator:Enable()
   for i = 1, NUM_CHAT_WINDOWS do
     local editBox = _G['ChatFrame' .. i .. 'EditBox']
     editBox:HookScript('OnArrowPressed', self.methods._OnChatArrowPressed)
+    editBox:HookScript('OnCursorChanged', self.methods._OnChatCursorChanged)
   end
 end
 
@@ -112,11 +113,7 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
   end
 
   if not self.buttonMenu:IsEmpty() then
-    -- Calculate the offset for the start bracket of the item link (this does
-    -- not account for potential scrolling inside the edit box)
-    local left, padding = editBox:GetTextInsets()
-    local stringWidth = self:_GetEditBoxStringWidth(editBox, searchInfo.preSearchTermText)
-    local offsetX = math.min(left + stringWidth, editBox:GetSize() - padding * 2)
+    local offsetX = select(1, editBox:GetTextInsets()) + searchInfo.searchOffsetX
     self.buttonMenu:ClearAllPoints()
     self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX, editBox.autoCompleteYOffset or -AUTOCOMPLETE_DEFAULT_Y_OFFSET)
     self.buttonMenu:Show()
@@ -126,16 +123,12 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
 end
 
 function ChatAutocompleteIntegrator:_OnItemSelected(editBox, item)
-  local cursorPosition = editBox:GetCursorPosition()
-  local text = editBox:GetText()
-  local activeText = text:sub(1, cursorPosition)
-  local _, startIndex = self:_ExtractSearchTerm(activeText)
+  local searchTerm, prefixText, suffixText = self:_GetEditBoxSearchTerm(editBox)
 
-  local prefixText = text:sub(1, startIndex - 1)
-  local suffixText = text:sub(cursorPosition + 1)
-
-  editBox:SetText(prefixText .. item.link .. suffixText)
-  editBox:SetCursorPosition(#prefixText + #item.link)
+  if not util.IsNilOrEmpty(searchTerm) then
+    editBox:SetText(prefixText .. item.link .. suffixText)
+    editBox:SetCursorPosition(#prefixText + #item.link)
+  end
 
   self.buttonMenu:Hide()
 end
@@ -143,24 +136,19 @@ end
 function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
   if not isUserInput then return end
 
-  local cursorPosition = editBox:GetCursorPosition()
-  local activeText = editBox:GetText():sub(1, cursorPosition)
-  local searchTerm, startIndex = self:_ExtractSearchTerm(activeText)
+  local searchTerm = self:_GetEditBoxSearchTerm(editBox)
 
   if util.IsNilOrEmpty(searchTerm) then
+    self.searchCursorOffsetX = searchTerm == '' and self.editBoxCursorOffsets[editBox] or nil
     self.buttonMenu:Hide()
     return
   end
 
-  -- This event may be triggered twice, therefore confirm it's a new search
-  if searchTerm == self.previousSearchTerm and self.buttonMenu:IsShown() then
-    return
-  end
-
-  self.previousSearchTerm = searchTerm
   self.itemDatabase:FindItemsAsync(searchTerm, const.maxItems, function(items)
-    local searchInfo = { preSearchTermText = activeText:sub(1, startIndex - 1) }
-    self:_OnItemSearchComplete(editBox, items, searchInfo)
+    self:_OnItemSearchComplete(editBox, items, {
+      searchTerm = searchTerm,
+      searchOffsetX = self.searchCursorOffsetX or self.editBoxCursorOffsets[editBox],
+    })
   end)
 end
 
@@ -172,6 +160,10 @@ function ChatAutocompleteIntegrator:_OnChatArrowPressed(editBox, key)
       self.buttonMenu:IncrementSelection(false)
     end
   end
+end
+
+function ChatAutocompleteIntegrator:_OnChatCursorChanged(editBox, x, y)
+  self.editBoxCursorOffsets[editBox] = x
 end
 
 function ChatAutocompleteIntegrator:_OnChatFocusLost(editBox)
@@ -186,9 +178,9 @@ function ChatAutocompleteIntegrator:_HookChatMessageBeforeSend(text)
     -- taints the runtime and prevents any secure commands from being executed
     -- in the chat (e.g. /target). To circumvent this, a function run later in
     -- the invocation chain is hooked instead - SubstituteChatMessageBeforeSend.
-    -- To actually prevent normal operations, the return value itself is
-    -- irrelevant due to being unused. Instead an error is thrown whilst a
-    -- temporary error handler is set to avoid any user inconvenience.
+    -- To actually prevent normal operations, the return value cannot be
+    -- utilized due to being unused. Instead an error is thrown whilst a
+    -- temporary error handler is set to avoid any interference for users.
     self:_OnItemSelected(editBox, self.buttonMenu:GetSelection())
     util.Abort()
   end
@@ -214,28 +206,36 @@ function ChatAutocompleteIntegrator:_HookChatTabPressed(editBox)
   return self.original.chatEditCustomTabPressed(editBox)
 end
 
-function ChatAutocompleteIntegrator:_GetEditBoxStringWidth(editBox, text)
-  if self.fontStringWidthTester == nil then
-    -- Assume each edit box use the same font
-    local font, size, type = editBox:GetFont()
-    self.fontStringWidthTester = UIParent:CreateFontString()
-    self.fontStringWidthTester:SetFont(font, size, type)
+function ChatAutocompleteIntegrator:_GetEditBoxSearchTerm(editBox)
+  local cursorPosition = editBox:GetCursorPosition()
+  local text = editBox:GetText()
+  local activeText = editBox:GetText():sub(1, cursorPosition)
+  local searchTerm, startIndex = self:_ExtractSearchTerm(activeText)
+
+  if searchTerm == nil then
+    return nil, nil, nil
   end
 
-  self.fontStringWidthTester:SetText(text)
-  return self.fontStringWidthTester:GetStringWidth()
+  local prefixText = text:sub(1, startIndex - 1)
+  local suffixText = text:sub(cursorPosition + 1)
+
+  return searchTerm, prefixText, suffixText
 end
 
 function ChatAutocompleteIntegrator:_ExtractSearchTerm(text)
   local open, close = unpack(self.itemLinkDelimiters)
 
   for i = #text, 1, -1 do
-    if text:byte(i) == close then return end
+    if text:byte(i) == close then
+      return nil, 0
+    end
 
     if text:byte(i) == open then
       return text:sub(i + 1), i
     end
   end
+
+  return nil, 0
 end
 
 ------------------------------------------
