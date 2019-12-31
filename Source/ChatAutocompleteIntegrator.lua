@@ -59,6 +59,19 @@ function ChatAutocompleteIntegrator:Enable()
     editBox:HookScript('OnArrowPressed', self.methods._OnChatArrowPressed)
     editBox:HookScript('OnCursorChanged', self.methods._OnChatCursorChanged)
   end
+
+  self.buttonMenu:HookScript('OnShow', function(self)
+    local parent = self:GetParent()
+    self.previousArrowKeyMode = parent:GetAltArrowKeyMode()
+    parent:SetAltArrowKeyMode(false)
+  end)
+
+  self.buttonMenu:HookScript('OnHide', function(self)
+    if self.previousArrowKeyMode then
+      self:GetParent():SetAltArrowKeyMode(self.previousArrowKeyMode)
+      self.previousArrowKeyMode = nil
+    end
+  end)
 end
 
 function ChatAutocompleteIntegrator:Config(options)
@@ -121,6 +134,7 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
 
   if not self.buttonMenu:IsEmpty() then
     local offsetX = select(1, editBox:GetTextInsets()) + searchInfo.searchOffsetX
+    self.buttonMenu:SetParent(editBox)
     self.buttonMenu:ClearAllPoints()
     self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX, editBox.autoCompleteYOffset or -AUTOCOMPLETE_DEFAULT_Y_OFFSET)
     self.buttonMenu:Show()
