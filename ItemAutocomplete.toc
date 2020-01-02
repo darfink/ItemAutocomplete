@@ -1,7 +1,7 @@
 ## Interface: 11303
 ## Title: Item Autocomplete
 ## Author: Darfink
-## Version: 1.0.2
+## Version: 1.0.3
 ## SavedVariables: ItemAutocompleteDB
 
 # Libraries
