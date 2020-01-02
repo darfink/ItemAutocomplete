@@ -127,7 +127,7 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
     self.buttonMenu:AddButton({
       text = item.link,
       value = item,
-      onTooltipShow = function(tooltip) tooltip:SetHyperlink(item.link) end,
+      onTooltipShow = function(tooltip) tooltip:SetItemByID(item.id) end,
       onClick = function(item) self:_OnItemSelected(editBox, item) end
     })
   end
