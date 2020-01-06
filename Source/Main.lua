@@ -27,9 +27,9 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
   local chatAutocompleteIntegrator = ChatAutocompleteIntegrator.New(itemDatabase)
 
   local updateItemDatabase = function()
-    util.Print('Updating item database')
+    util.PrettyPrint('Updating item database')
     itemDatabase:UpdateItemsAsync(function()
-      util.Print('The database has been updated.')
+      util.PrettyPrint('The database has been updated.')
     end)
   end
 
