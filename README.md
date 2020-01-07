@@ -1,6 +1,6 @@
 # ItemAutocomplete
 
-This is an autocomplete addon for item links in WoW Classic. It integrates with your chat and is triggered with a single character (default `[`), making every single item in the game available with a few key strokes.
+This is an autocomplete addon for item links in WoW Classic. It integrates with your chat and is triggered with a single character (default <kbd>[</kbd>), making every single item in the game available with a few key strokes.
 
 ![In-game demo](https://i.imgur.com/H70fus7.gif)
 
