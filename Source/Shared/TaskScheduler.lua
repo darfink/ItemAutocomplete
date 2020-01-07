@@ -64,10 +64,12 @@ function TaskScheduler:_OnUpdate()
   for taskId, task in pairs(self.tasks) do
     local success, result = coroutine.resume(task.thread)
 
-    if not success or coroutine.status(task.thread) == 'dead' then
+    if coroutine.status(task.thread) == 'dead' then
       self.tasks[taskId] = nil
 
-      if task.onFinish ~= nil then
+      if not success then
+        error(result)
+      elseif task.onFinish ~= nil then
         task.onFinish(result)
       end
     else
