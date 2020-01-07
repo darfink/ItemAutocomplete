@@ -150,7 +150,7 @@ function export.FuzzyMatch(text, pattern, caseInsensitive)
   if sidx >= 1 and eidx >= 1 then
     pidx = pidx - 1
     for index = eidx - 1, sidx, -1 do
-      char = text:byte(index)
+      local char = text:byte(index)
 
       if caseInsensitive and IsUpperCaseLetter(char) then
         char = char + 32

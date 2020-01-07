@@ -17,7 +17,7 @@ function func.pass() end
 
 function func.require(name)
   if not interfaces[name] then
-    createmodule(name)
+    func.createmodule(name)
   end
 
   return interfaces[name]
@@ -40,7 +40,7 @@ function func.createmodule(name)
 
   environment._M = environment
   environments[name] = environment
-  interfaces[name] = setmetatable({}, { __metatable = false, __index = exports, __newindex = pass })
+  interfaces[name] = setmetatable({}, { __metatable = false, __index = exports, __newindex = func.pass })
 end
 
 ------------------------------------------

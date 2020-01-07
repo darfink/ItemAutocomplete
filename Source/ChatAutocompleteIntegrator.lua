@@ -60,16 +60,16 @@ function ChatAutocompleteIntegrator:Enable()
     editBox:HookScript('OnCursorChanged', self.methods._OnChatCursorChanged)
   end
 
-  self.buttonMenu:HookScript('OnShow', function(self)
-    local parent = self:GetParent()
-    self.previousArrowKeyMode = parent:GetAltArrowKeyMode()
+  self.buttonMenu:HookScript('OnShow', function(menu)
+    local parent = menu:GetParent()
+    menu.previousArrowKeyMode = parent:GetAltArrowKeyMode()
     parent:SetAltArrowKeyMode(false)
   end)
 
-  self.buttonMenu:HookScript('OnHide', function(self)
-    if self.previousArrowKeyMode then
-      self:GetParent():SetAltArrowKeyMode(self.previousArrowKeyMode)
-      self.previousArrowKeyMode = nil
+  self.buttonMenu:HookScript('OnHide', function(menu)
+    if menu.previousArrowKeyMode then
+      menu:GetParent():SetAltArrowKeyMode(menu.previousArrowKeyMode)
+      menu.previousArrowKeyMode = nil
     end
   end)
 end
@@ -128,7 +128,7 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
       text = item.link,
       value = item,
       onTooltipShow = function(tooltip) tooltip:SetItemByID(item.id) end,
-      onClick = function(item) self:_OnItemSelected(editBox, item) end
+      onClick = function(_) self:_OnItemSelected(editBox, item) end
     })
   end
 
@@ -173,7 +173,7 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
   end)
 end
 
-function ChatAutocompleteIntegrator:_OnChatArrowPressed(editBox, key)
+function ChatAutocompleteIntegrator:_OnChatArrowPressed(_, key)
   if self.buttonMenu:IsShown() then
     if key == 'UP' then
       self.buttonMenu:IncrementSelection(true)
@@ -183,11 +183,11 @@ function ChatAutocompleteIntegrator:_OnChatArrowPressed(editBox, key)
   end
 end
 
-function ChatAutocompleteIntegrator:_OnChatCursorChanged(editBox, x, y)
+function ChatAutocompleteIntegrator:_OnChatCursorChanged(editBox, x)
   self.editBoxCursorOffsets[editBox] = x
 end
 
-function ChatAutocompleteIntegrator:_OnChatFocusLost(editBox)
+function ChatAutocompleteIntegrator:_OnChatFocusLost(_)
   self.buttonMenu:Hide()
 end
 

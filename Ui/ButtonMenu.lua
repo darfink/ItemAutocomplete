@@ -4,17 +4,17 @@ select(2, ...) 'Ui.ButtonMenu'
 -- Global exports
 ------------------------------------------
 
-function _G.ItemAutocompleteButtonMenuOnLoad(self)
-  self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b)
-  self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b)
-  self:SetScript('OnHide', function() self:HideGameTooltipIfOwned() end)
-  self.selectedButtonIndex = nil
-  self.buttonCount = 0
-  self.buttons = {}
-  self.buttonMargin = 30
-  self.baseHeight = 40
+function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
+  buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b)
+  buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b)
+  buttonMenu:SetScript('OnHide', function() buttonMenu:HideGameTooltipIfOwned() end)
+  buttonMenu.selectedButtonIndex = nil
+  buttonMenu.buttonCount = 0
+  buttonMenu.buttons = {}
+  buttonMenu.buttonMargin = 30
+  buttonMenu.baseHeight = 40
 
-  function self:SelectButton(buttonIndex)
+  function buttonMenu:SelectButton(buttonIndex)
     assert(buttonIndex == nil or buttonIndex >= 1 and buttonIndex <= self.buttonCount, 'Button index is out of bounds')
 
     local previousButton = self.buttons[self.selectedButtonIndex]
@@ -36,12 +36,12 @@ function _G.ItemAutocompleteButtonMenuOnLoad(self)
     self.selectedButtonIndex = buttonIndex
   end
 
-  function self:GetSelection()
+  function buttonMenu:GetSelection()
     local selectedButton = self.buttons[self.selectedButtonIndex]
     return selectedButton and selectedButton.info.value
   end
 
-  function self:IncrementSelection(decrement)
+  function buttonMenu:IncrementSelection(decrement)
     if self:IsEmpty() then return end
 
     local buttonIndex = self.selectedButtonIndex + (decrement and -1 or 1)
@@ -55,7 +55,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(self)
     self:SelectButton(buttonIndex)
   end
 
-  function self:AddButton(info)
+  function buttonMenu:AddButton(info)
     self.buttonCount = self.buttonCount + 1
 
     if self.buttons[self.buttonCount] == nil then
@@ -78,7 +78,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(self)
     self:SetWidth(math.max(buttonWidth, self:GetWidth()))
   end
 
-  function self:ClearAll()
+  function buttonMenu:ClearAll()
     if self:IsEmpty() then return end
     self:SelectButton(nil)
 
@@ -90,11 +90,11 @@ function _G.ItemAutocompleteButtonMenuOnLoad(self)
     self:SetWidth(50)
   end
 
-  function self:IsEmpty()
+  function buttonMenu:IsEmpty()
     return self.buttonCount == 0
   end
 
-  function self:HideGameTooltipIfOwned()
+  function buttonMenu:HideGameTooltipIfOwned()
     local owner = GameTooltip:GetOwner()
 
     for _, button in ipairs(self.buttons) do
@@ -105,7 +105,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(self)
     end
   end
 
-  function self:_CreateButton(index)
+  function buttonMenu:_CreateButton()
     local button = CreateFrame('Button', nil, self, 'ItemAutocompleteButtonTemplate')
 
     button.ShowTooltip = function()

@@ -126,7 +126,7 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
 end
 
 function ItemDatabase:_TaskFindItems(pattern, limit, itemsPerYield)
-  local limit = limit or 1 / 0
+  limit = limit or 1 / 0
   local foundItems = {}
   local iterations = 0
 
@@ -139,7 +139,7 @@ function ItemDatabase:_TaskFindItems(pattern, limit, itemsPerYield)
   -- profiling shows it performs worst of all. The used solution is O(n²) due to
   -- the inner loop being O(n). Using binary search for the insertion point is
   -- also worse than insertion sort when a low 'limit' is used.
-  for itemId, item in self:ItemIterator() do
+  for _, item in self:ItemIterator() do
     local startIndex, _, score = algo.FuzzyMatch(item.name, pattern, caseInsensitive)
 
     if startIndex ~= 0 then
