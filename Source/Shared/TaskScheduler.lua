@@ -68,7 +68,11 @@ function TaskScheduler:_OnUpdate()
       self.tasks[taskId] = nil
 
       if not success then
-        error(result)
+        if task.onError ~= nil then
+          task.onError(result)
+        else
+          error(result)
+        end
       elseif task.onFinish ~= nil then
         task.onFinish(result)
       end
