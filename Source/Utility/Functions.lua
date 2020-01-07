@@ -16,8 +16,9 @@ function export.GetAddonName()
 end
 
 -- Prints an addon message to the default chat frame
-function export.PrettyPrint(message)
-  message = string.format('|cFFFFA500[%s]|r: %s', addonName, message)
+function export.PrettyPrint(...)
+  local args = table.concat({...}, ' ')
+  local message = string.format('|cFFFFA500[%s]|r: %s', addonName, args)
   DEFAULT_CHAT_FRAME:AddMessage(message)
 end
 

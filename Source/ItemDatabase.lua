@@ -1,8 +1,9 @@
 select(2, ...) 'ItemDatabase'
 
 -- Imports
-local algo = require 'Utility.Algo'
+local utf8 = require 'Shared.UTF8'
 local util = require 'Utility.Functions'
+local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 
 -- Consts
 local const = util.ReadOnly({
@@ -131,7 +132,15 @@ function ItemDatabase:_TaskFindItems(pattern, limit, itemsPerYield)
   local iterations = 0
 
   -- Use smart case (i.e only check casing if the pattern contains uppercase letters)
-  local caseInsensitive = not pattern:find('%u')
+  local caseInsensitive = true
+  for _, codePoint in utf8.CodePoints(pattern) do
+    if utf8.IsUpperCaseLetter(codePoint) then
+      caseInsensitive = false
+      break
+    end
+  end
+
+  local fuzzyMatcher = FuzzyMatcher.New(pattern, caseInsensitive)
 
   -- The following is a trade-off between execution time & memory. Adding all
   -- items to an array and sorting afterwards is O(nlogn), but requires a
@@ -140,7 +149,7 @@ function ItemDatabase:_TaskFindItems(pattern, limit, itemsPerYield)
   -- the inner loop being O(n). Using binary search for the insertion point is
   -- also worse than insertion sort when a low 'limit' is used.
   for _, item in self:ItemIterator() do
-    local startIndex, _, score = algo.FuzzyMatch(item.name, pattern, caseInsensitive)
+    local startIndex, _, score = fuzzyMatcher:Match(item.name)
 
     if startIndex ~= 0 then
       local insertionPoint = #foundItems + 1

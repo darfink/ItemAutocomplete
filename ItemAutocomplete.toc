@@ -10,11 +10,14 @@ Libs\Libs.xml
 # Addon
 Ui\ButtonMenu.lua
 Ui\ButtonMenu.xml
+Source\Shared\UTF8\Casing.lua
+Source\Shared\UTF8\Charsets.lua
+Source\Shared\UTF8\Index.lua
 Source\Shared\EventSource.lua
 Source\Shared\Persistence.lua
 Source\Shared\TaskScheduler.lua
-Source\Utility\Algo.lua
 Source\Utility\Functions.lua
+Source\Utility\FuzzyMatcher.lua
 Source\ChatAutocompleteIntegrator.lua
 Source\ItemDatabase.lua
 Source\Main.lua
