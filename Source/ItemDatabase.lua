@@ -90,8 +90,7 @@ function ItemDatabase:UpdateItemsAsync(callback)
 end
 
 function ItemDatabase:IsEmpty()
-  for _ in pairs(self.itemsById) do return false end
-  return true
+  return next(self.itemsById) == nil
 end
 
 function ItemDatabase:IsUpdating()
