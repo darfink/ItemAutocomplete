@@ -88,22 +88,22 @@ end
 
 -- Returns whether the character is a letter or not
 function export.IsLetter(input)
-  return not not charsets.Default[0x61][GetCharacterCodePoint(input)]
+  return not not charsets.Letters[GetCharacterCodePoint(input)]
 end
 
 -- Returns whether the character is an upper case letter or not
 function export.IsUpperCaseLetter(input)
-  return not not charsets.Default[0x75][GetCharacterCodePoint(input)]
+  return not not charsets.UpperCaseLetters[GetCharacterCodePoint(input)]
 end
 
 -- Returns whether the character is a lower case letter or not
 function export.IsLowerCaseLetter(input)
-  return not not charsets.Default[0x6C][GetCharacterCodePoint(input)]
+  return not not charsets.LowerCaseLetters[GetCharacterCodePoint(input)]
 end
 
 -- Returns whether the character is a digit or not
 function export.IsDigit(input)
-  return not not charsets.Default[0x64][GetCharacterCodePoint(input)]
+  return not not charsets.Digits[GetCharacterCodePoint(input)]
 end
 
 -- Converts a string or character to lower case

@@ -3513,7 +3513,7 @@ setmetatable( pats[0x57], { __index = function ( _, k ) return k and not pats[0x
 setmetatable( pats[0x58], { __index = function ( _, k ) return k and not pats[0x78][k] end } )
 setmetatable( pats[0x5a], { __index = function ( _, k ) return k and not pats[0x7a][k] end } )
 
-for k, t in pairs( pats ) do
+for k, t in pairs(pats) do
   if k >= 0x61 then
     for i = 0x20, 0x7e do
       t[i] = t[i] or false
@@ -3525,4 +3525,7 @@ end
 -- Exports
 ------------------------------------------
 
-export.Default = pats
+export.Letters = pats[0x61]
+export.UpperCaseLetters = pats[0x75]
+export.LowerCaseLetters = pats[0x6C]
+export.Digits = pats[0x64]
