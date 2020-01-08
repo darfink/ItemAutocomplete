@@ -106,17 +106,17 @@ function export.IsDigit(input)
   return not not charsets.Digits[GetCharacterCodePoint(input)]
 end
 
--- Converts a string or character to lower case
+-- Converts a character to lower case
 function export.ToLower(input)
-  if type(input) == 'number' then
-    if input >= 65 and input <= 90 then
-      return input + 32
-    elseif input > maxAscii then
-      return casing.UpperToLowerByCodePoint[input] or input
-    end
-
-    return input
-  else
-    return input:gsub('([^\128-\191][\128-\191]*)', casing.UpperToLowerByString)
+  if type(input) ~= 'number' then
+    error('not implemented')
   end
+
+  if input >= 65 and input <= 90 then
+    return input + 32
+  elseif input > maxAscii then
+    return casing.UpperToLowerByCodePoint[input] or input
+  end
+
+  return input
 end

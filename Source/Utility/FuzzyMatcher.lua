@@ -21,11 +21,8 @@ function FuzzyMatcher.New(pattern, caseInsensitive)
   self.patternCodePoints = {}
   self.textBuffer = {}
 
-  if caseInsensitive then
-    pattern = utf8.ToLower(pattern)
-  end
-
   for _, codePoint in utf8.CodePoints(pattern) do
+    codePoint = caseInsensitive and utf8.ToLower(codePoint) or codePoint
     self.patternCodePoints[#self.patternCodePoints + 1] = codePoint
   end
 
