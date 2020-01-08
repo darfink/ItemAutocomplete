@@ -174,7 +174,8 @@ function FuzzyMatcher:_EvaluateBonus(textCodePoints, textLength, sidx, eidx)
       end
 
       if pidx == 1 then
-        score = score + bonus * bonusFirstCharMultiplier
+        local additionalBonus = index == 1 and 2 or 1
+        score = score + bonus * math.pow(bonusFirstCharMultiplier, additionalBonus)
       else
         score = score + bonus
       end
