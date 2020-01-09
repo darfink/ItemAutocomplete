@@ -11,6 +11,29 @@ local ChatAutocompleteIntegrator = require 'ChatAutocompleteIntegrator'
 local util = require 'Utility.Functions'
 
 ------------------------------------------
+-- Private functions
+------------------------------------------
+
+local function RegisterOptions(addonName, persistence, config)
+  local options = persistence:GetAccountItem('options')
+  for name, input in pairs(config) do
+    local originalSetter = input.set
+    input.get = function() return options[name] end
+    input.set = function(_, value)
+      options[name] = value
+      originalSetter(value)
+    end
+
+    options[name] = options[name] or input.default
+    originalSetter(options[name])
+    input.default = nil
+  end
+
+  AceConfig:RegisterOptionsTable(addonName, { type = 'group', args = config })
+  AceConfigDialog:AddToBlizOptions(addonName)
+end
+
+------------------------------------------
 -- Bootstrap
 ------------------------------------------
 
@@ -37,12 +60,9 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
     updateItemDatabase()
   end
 
-  local options = persistence:GetAccountItem('options')
-  local inputs = chatAutocompleteIntegrator:Config(options)
+  local config = chatAutocompleteIntegrator:Config()
   chatAutocompleteIntegrator:Enable()
 
-  AceConfig:RegisterOptionsTable(addonName, { type = 'group', args = inputs })
-  AceConfigDialog:AddToBlizOptions(addonName, addonName)
-
+  RegisterOptions(addonName, persistence, config)
   util.RegisterSlashCommand('iaupdate', updateItemDatabase)
 end)

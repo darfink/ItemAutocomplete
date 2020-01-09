@@ -1,7 +1,6 @@
 select(2, ...) 'ItemDatabase'
 
 -- Imports
-local utf8 = require 'Shared.UTF8'
 local util = require 'Utility.Functions'
 local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 
@@ -63,7 +62,7 @@ function ItemDatabase:GetItemById(itemId)
   return self.itemsById[itemId]
 end
 
-function ItemDatabase:FindItemsAsync(text, limit, callback)
+function ItemDatabase:FindItemsAsync(options, callback)
   -- Only one item query may be running at a time, therefore replace any
   -- scheduled task since the result will most likely be obsolete when it's
   -- complete.
@@ -71,7 +70,10 @@ function ItemDatabase:FindItemsAsync(text, limit, callback)
 
   self.findItemsTaskId = self.taskScheduler:Queue({
     onFinish = callback,
-    task = function() return self:_TaskFindItems(text, limit, const.itemsSearchedPerUpdate) end,
+    task = function()
+      options.itemsPerYield = const.itemsSearchedPerUpdate
+      return self:_TaskFindItems(options)
+    end,
   })
 end
 
@@ -126,21 +128,18 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
   return 1
 end
 
-function ItemDatabase:_TaskFindItems(pattern, limit, itemsPerYield)
-  limit = limit or 1 / 0
-  local foundItems = {}
-  local iterations = 0
+function ItemDatabase:_TaskFindItems(options)
+  local limit = options.limit or 1 / 0
+  local caseInsensitive = options.caseInsensitive
 
-  -- Use smart case (i.e only check casing if the pattern contains uppercase letters)
-  local caseInsensitive = true
-  for _, codePoint in utf8.CodePoints(pattern) do
-    if utf8.IsUpperCaseLetter(codePoint) then
-      caseInsensitive = false
-      break
-    end
+  if caseInsensitive == nil then
+    -- Use smart case (i.e only check casing if the pattern contains uppercase letters)
+    caseInsensitive = not util.ContainsUppercase(options.pattern)
   end
 
-  local fuzzyMatcher = FuzzyMatcher.New(pattern, caseInsensitive)
+  local fuzzyMatcher = FuzzyMatcher.New(options.pattern, caseInsensitive)
+  local foundItems = {}
+  local iterations = 0
 
   -- The following is a trade-off between execution time & memory. Adding all
   -- items to an array and sorting afterwards is O(nlogn), but requires a
@@ -167,7 +166,7 @@ function ItemDatabase:_TaskFindItems(pattern, limit, itemsPerYield)
     end
 
     iterations = iterations + 1
-    if iterations % itemsPerYield == 0 then
+    if iterations % options.itemsPerYield == 0 then
       coroutine.yield()
     end
   end

@@ -24,6 +24,7 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
   self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
   self.buttonMenu:Hide()
   self.buttonMenu:SetFrameLevel(10)
+  self.caseInsensitive = nil
   self.editBoxCursorOffsets = {}
   self.itemDatabase = itemDatabase
   self.methods = util.ContextBinder(self)
@@ -74,13 +75,24 @@ function ChatAutocompleteIntegrator:Enable()
   end)
 end
 
-function ChatAutocompleteIntegrator:Config(options)
-  options.itemLinkDelimiters = options.itemLinkDelimiters or '[]'
-  self:SetItemLinkDelimiters(
-    options.itemLinkDelimiters:byte(1),
-    options.itemLinkDelimiters:byte(2))
-
+function ChatAutocompleteIntegrator:Config()
   return {
+    caseSensitivity = {
+      type = 'select',
+      values = {
+        'Smart case',
+        'Case-insensitive',
+        'Case-sensitive',
+      },
+      style = 'dropdown',
+      name = 'Case sensitivity',
+      desc = 'Specify the case sensitivity when searching.',
+      default = 1,
+      set = function(value)
+        local map = { nil, true, false }
+        self.caseInsensitive = map[value]
+      end,
+    },
     itemLinkDelimiters = {
       type = 'select',
       values = {
@@ -92,10 +104,9 @@ function ChatAutocompleteIntegrator:Config(options)
       style = 'dropdown',
       name = 'Chat item link delimiters',
       desc = 'Specify the item link delimiters used.',
-      get = function() return options.itemLinkDelimiters end,
-      set = function(_, key)
-        options.itemLinkDelimiters = key
-        self:SetItemLinkDelimiters(key:byte(1), key:byte(2))
+      default = '[]',
+      set = function(value)
+        self:SetItemLinkDelimiters(value:byte(1), value:byte(2))
       end,
     },
   }
@@ -165,7 +176,11 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
     return
   end
 
-  self.itemDatabase:FindItemsAsync(searchTerm, const.maxItems, function(items)
+  self.itemDatabase:FindItemsAsync({
+    pattern = searchTerm,
+    limit = const.maxItems,
+    caseInsensitive = self.caseInsensitive,
+  }, function(items)
     self:_OnItemSearchComplete(editBox, items, {
       searchTerm = searchTerm,
       searchOffsetX = self.searchCursorOffsetX or self.editBoxCursorOffsets[editBox],

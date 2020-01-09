@@ -1,5 +1,8 @@
 select(2, ...) 'Utility.Functions'
 
+-- Imports
+local utf8 = require 'Shared.UTF8'
+
 ------------------------------------------
 -- Constants
 ------------------------------------------
@@ -97,4 +100,12 @@ function export.ContextBinder(context)
     end,
     __metatable = false,
   })
+end
+
+-- Returns whether a string contains uppercase or not
+function export.ContainsUppercase(text)
+  for _, codePoint in utf8.CodePoints(text) do
+    if utf8.IsUpperCaseLetter(codePoint) then return true end
+  end
+  return false
 end
