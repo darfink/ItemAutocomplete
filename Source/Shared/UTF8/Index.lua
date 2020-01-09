@@ -82,6 +82,12 @@ end
 export.maxAscii = maxAscii
 
 -- Returns an iterator of an UTF-8 string's codepoints
+--
+-- This is intentionally a stateless iterator to improve performance and avoid
+-- allocations whilst iterating a string's code points. Profiling showed that
+-- this halves the execution time of the fuzzy search algorithm. The downside is
+-- that the index value returned by the iterator may not be what is expected;
+-- it's the byte index of the *next* code point (not the current one).
 function export.CodePoints(string)
   return CodePoint, string, 1
 end
