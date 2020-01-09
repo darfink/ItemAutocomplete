@@ -144,7 +144,7 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
   end
 
   if not self.buttonMenu:IsEmpty() then
-    local offsetX = select(1, editBox:GetTextInsets()) + searchInfo.searchOffsetX
+    local offsetX = editBox:GetTextInsets() + searchInfo.searchOffsetX
     self.buttonMenu:SetParent(editBox)
     self.buttonMenu:ClearAllPoints()
     self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX, editBox.autoCompleteYOffset or -AUTOCOMPLETE_DEFAULT_Y_OFFSET)
