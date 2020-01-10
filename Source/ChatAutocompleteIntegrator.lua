@@ -129,7 +129,7 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
   local searchTerm = self:_GetEditBoxSearchTerm(editBox)
 
   -- Since this is received asynchronously, discard the result if it has become irrelevant
-  if util.IsNilOrEmpty(searchTerm) or searchTerm:find(searchInfo.searchTerm) ~= 1 then
+  if util.IsNilOrEmpty(searchTerm) or searchTerm:find(searchInfo.searchTerm, nil, true) ~= 1 then
     return self.buttonMenu:Hide()
   end
 
