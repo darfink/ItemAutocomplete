@@ -46,7 +46,7 @@ function ItemDatabase:AddItemById(itemId)
 
   -- The item info may not yet exist, in that case it's received asynchronously
   -- from the server via the GET_ITEM_INFO_RECEIVED event.
-  if itemName ~= nil then
+  if itemName ~= nil and not self:_IsDevItem(itemId, itemName) then
     self.itemsById[itemId] = {
       id = itemId,
       name = itemName,
@@ -63,6 +63,9 @@ function ItemDatabase:GetItemById(itemId)
 end
 
 function ItemDatabase:FindItemsAsync(options, callback)
+  -- This is a balance between responsiveness and frame drops
+  options.itemsPerYield = const.itemsSearchedPerUpdate
+
   -- Only one item query may be running at a time, therefore replace any
   -- scheduled task since the result will most likely be obsolete when it's
   -- complete.
@@ -70,18 +73,14 @@ function ItemDatabase:FindItemsAsync(options, callback)
 
   self.findItemsTaskId = self.taskScheduler:Queue({
     onFinish = callback,
-    task = function()
-      options.itemsPerYield = const.itemsSearchedPerUpdate
-      return self:_TaskFindItems(options)
-    end,
+    task = function() return self:_TaskFindItems(options) end,
   })
 end
 
 function ItemDatabase:UpdateItemsAsync(callback)
-  if self:IsUpdating() then
-    return
-  end
+  if self:IsUpdating() then return end
 
+  wipe(self.itemsById)
   for _, itemId in ipairs(const.disjunctItemIds) do
     self:AddItemById(itemId)
   end
@@ -107,6 +106,23 @@ end
 ------------------------------------------
 -- Private methods
 ------------------------------------------
+
+function ItemDatabase:_IsDevItem(itemId, itemName)
+  if itemId == 19971 then return false end
+  if itemName:match('Monster %-') then return true end
+  if itemName:match('DEPRECATED') then return true end
+  if itemName:match('Dep[rt][ie]cated') then return true end
+  if itemName:match('DEP') then return true end
+  if itemName:match('DEBUG') then return true end
+  if itemName:match('[ %(]test[%) ]') then return true end
+  if itemName:match('^test ') then return true end
+  if itemName:match('Testing ?%d?$') then return true end
+  if itemName:match('Test[%u) ]') then return true end
+  if itemName:match('Test$') then return true end
+  if itemName:match('TEST') then return true end
+  if itemName == 'test' then return true end
+  return false
+end
 
 function ItemDatabase:_OnItemInfoReceived(itemId, success)
   if success then
