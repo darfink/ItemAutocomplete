@@ -50,7 +50,7 @@ local function CodePoint(string, offset)
     offset = offset + 1
     char = string:byte(offset)
 
-    if char < 128 or char > 191 then
+    if char <= maxAscii or char > 191 then
       error('Following bytes must have values between 0x80 and 0xBF')
     end
 
