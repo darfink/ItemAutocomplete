@@ -120,6 +120,8 @@ function ItemDatabase:_IsDevItem(itemId, itemName)
   if itemName:match('Dep[rt][ie]cated') then return true end
   if itemName:match('DEP') then return true end
   if itemName:match('DEBUG') then return true end
+  if itemName:match('%(old%d?%)') then return true end
+  if itemName:match('OLD') then return true end
   if itemName:match('[ %(]test[%) ]') then return true end
   if itemName:match('^test ') then return true end
   if itemName:match('Testing ?%d?$') then return true end
