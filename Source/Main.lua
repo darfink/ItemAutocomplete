@@ -56,7 +56,7 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
     end)
   end
 
-  if itemDatabase:IsEmpty() then
+  if itemDatabase:IsEmpty() or itemDatabase:IsObsolete() then
     updateItemDatabase()
   end
 

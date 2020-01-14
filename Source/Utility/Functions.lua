@@ -18,6 +18,11 @@ function export.GetAddonName()
   return addonName
 end
 
+-- Returns a field's value from the addon's meta data
+function export.GetAddonMetadata(field)
+  return GetAddOnMetadata(addonName, field)
+end
+
 -- Prints an addon message to the default chat frame
 function export.PrettyPrint(...)
   local args = table.concat({...}, ' ')

@@ -32,6 +32,7 @@ function ItemDatabase.New(persistence, eventSource, taskScheduler)
   self.eventSource = eventSource
   self.eventSource:AddListener('GET_ITEM_INFO_RECEIVED', self.methods._OnItemInfoReceived)
   self.itemsById = persistence:GetAccountItem('itemDatabase')
+  self.databaseInfo = persistence:GetAccountItem('itemDatabaseInfo')
   self.taskScheduler = taskScheduler
 
   return self
@@ -91,6 +92,11 @@ function ItemDatabase:UpdateItemsAsync(callback)
   })
 end
 
+function ItemDatabase:IsObsolete()
+  local latestVersion = tonumber(util.GetAddonMetadata('X-ItemDatabaseVersion'))
+  return (self.databaseInfo.version or 0) < latestVersion
+end
+
 function ItemDatabase:IsEmpty()
   return next(self.itemsById) == nil
 end
@@ -141,6 +147,7 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
     end
   end
 
+  self.databaseInfo.version = tonumber(util.GetAddonMetadata('X-ItemDatabaseVersion'))
   return 1
 end
 
