@@ -85,23 +85,19 @@ end
 
 -- Returns a table which exposes context bound methods
 function export.ContextBinder(context)
-  local fnCache = {}
-
   return setmetatable({}, {
-    __index = function (_, key)
-      if fnCache[key] == nil then
-        local method = context[key]
+    __index = function (self, key)
+      local method = context[key]
 
-        if type(method) ~= 'function' then
-          error('Unknown method ' .. key)
-        end
-
-        fnCache[key] = function(...)
-          return method(context, ...)
-        end
+      if type(method) ~= 'function' then
+        error('Unknown method ' .. key)
       end
 
-      return fnCache[key]
+      self[key] = function(...)
+        return method(context, ...)
+      end
+
+      return rawget(self, key)
     end,
     __metatable = false,
   })
