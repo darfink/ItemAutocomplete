@@ -3,7 +3,7 @@
 ## Author: Darfink
 ## Version: 2.5.1.38741
 ## SavedVariables: ItemAutocompleteDB
-## X-ItemDatabaseVersion: 1
+## X-ItemDatabaseVersion: 2
 
 # Libraries
 Libs\Libs.xml
