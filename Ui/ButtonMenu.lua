@@ -3,10 +3,15 @@ select(2, ...) 'Ui.ButtonMenu'
 ------------------------------------------
 -- Global exports
 ------------------------------------------
-
 function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
-  buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b)
-  buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b)
+  buttonMenu:SetBackdrop({
+    bgFile="Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+    edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",
+    tile=1, tileSize=10, edgeSize=10,
+    insets={left=3, right=3, top=3, bottom=3}
+  });
+  buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b, 1)
+  buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b, 1)
   buttonMenu:SetScript('OnHide', function() buttonMenu:HideGameTooltipIfOwned() end)
   buttonMenu.selectedButtonIndex = nil
   buttonMenu.buttonCount = 0
@@ -79,6 +84,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
   end
 
   function buttonMenu:ClearAll()
+
     if self:IsEmpty() then return end
     self:SelectButton(nil)
 
