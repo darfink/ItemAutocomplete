@@ -21,7 +21,6 @@ ChatAutocompleteIntegrator.__index = ChatAutocompleteIntegrator
 function ChatAutocompleteIntegrator.New(itemDatabase)
   local self = setmetatable({}, ChatAutocompleteIntegrator)
 
-  -- self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
   self.buttonMenu = CreateFrame('Frame', nil, UIParent, BackdropTemplateMixin and "ItemAutocompleteButtonMenuTemplate")
   self.buttonMenu:Hide()
   self.buttonMenu:SetFrameLevel(10)
@@ -131,7 +130,6 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
 
   -- Since this is received asynchronously, discard the result if it has become irrelevant
   if util.IsNilOrEmpty(searchTerm) or searchTerm:find(searchInfo.searchTerm, nil, true) ~= 1 then
-    util.PrettyPrint('Item search DISCARDED' + searchTerm)
     return self.buttonMenu:Hide()
   end
   self.buttonMenu:ClearAll()

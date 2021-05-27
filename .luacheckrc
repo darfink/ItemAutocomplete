@@ -18,6 +18,7 @@ globals = {
   "export",
 
   -- FrameXML misc
+  "BackdropTemplateMixin",
   "COMBAT_TEXT_SCROLL_FUNCTION",
   "ChatFrame_AddMessageEventFilter",
   "CombatLogGetCurrentEventInfo",

@@ -142,11 +142,11 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
   local itemCount = 0
   local itemCountTotal = 0
 
-  for k, range in pairs(const.itemIdRanges) do
+  for _, range in pairs(const.itemIdRanges) do
     itemCountTotal = itemCountTotal + range[2] - range[1] + 1
   end
 
-  for k, range in pairs(const.itemIdRanges) do
+  for _, range in pairs(const.itemIdRanges) do
     for itemId=range[1], range[2] do
       itemCount = itemCount + 1
       if C_Item.DoesItemExistByID(itemId) then
