@@ -7,8 +7,8 @@ local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 -- Consts
 local const = util.ReadOnly({
   -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
-  disjunctItemIds = {172070, 12270, 122284, 180089},
-  itemIdRanges = {{1,39656}, {184865,187130}},
+  disjunctItemIds = {172070, 122284, 180089},
+  itemIdRanges = {{1, 39656}, {184865, 187130}},
   itemsQueriedPerUpdate = 50,
   itemsSearchedPerUpdate = 1000,
 })
