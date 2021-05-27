@@ -7,8 +7,8 @@ local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 -- Consts
 local const = util.ReadOnly({
   -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
-  disjunctItemIds = {172070},
-  highestItemId = 24283,
+  disjunctItemIds = {172070, 12270, 122284, 180089},
+  itemIdRanges = {{1,39656}, {184865,187130}},
   itemsQueriedPerUpdate = 50,
   itemsSearchedPerUpdate = 1000,
 })
@@ -139,13 +139,23 @@ function ItemDatabase:_OnItemInfoReceived(itemId, success)
 end
 
 function ItemDatabase:_TaskUpdateItems(itemsPerYield)
-  for itemId = 1, const.highestItemId do
-    if C_Item.DoesItemExistByID(itemId) then
-      self:AddItemById(itemId)
-    end
+  local itemCount = 0
+  local itemCountTotal = 0
 
-    if itemId % itemsPerYield == 0 then
-      coroutine.yield(itemId / const.highestItemId)
+  for k, range in pairs(const.itemIdRanges) do
+    itemCountTotal = itemCountTotal + range[2] - range[1] + 1
+  end
+
+  for k, range in pairs(const.itemIdRanges) do
+    for itemId=range[1], range[2] do
+      itemCount = itemCount + 1
+      if C_Item.DoesItemExistByID(itemId) then
+        self:AddItemById(itemId)
+      end
+
+      if itemCount % itemsPerYield == 0 then
+        coroutine.yield(itemId / itemCountTotal)
+      end
     end
   end
 

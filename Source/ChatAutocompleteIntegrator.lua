@@ -21,7 +21,8 @@ ChatAutocompleteIntegrator.__index = ChatAutocompleteIntegrator
 function ChatAutocompleteIntegrator.New(itemDatabase)
   local self = setmetatable({}, ChatAutocompleteIntegrator)
 
-  self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
+  -- self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
+  self.buttonMenu = CreateFrame('Frame', nil, UIParent, BackdropTemplateMixin and "ItemAutocompleteButtonMenuTemplate")
   self.buttonMenu:Hide()
   self.buttonMenu:SetFrameLevel(10)
   self.caseInsensitive = nil
@@ -130,9 +131,9 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
 
   -- Since this is received asynchronously, discard the result if it has become irrelevant
   if util.IsNilOrEmpty(searchTerm) or searchTerm:find(searchInfo.searchTerm, nil, true) ~= 1 then
+    util.PrettyPrint('Item search DISCARDED' + searchTerm)
     return self.buttonMenu:Hide()
   end
-
   self.buttonMenu:ClearAll()
   for item in items do
     self.buttonMenu:AddButton({
@@ -142,7 +143,6 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
       onClick = function(_) self:_OnItemSelected(editBox, item) end
     })
   end
-
   if not self.buttonMenu:IsEmpty() then
     local offsetX = editBox:GetTextInsets() + searchInfo.searchOffsetX
     self.buttonMenu:SetParent(editBox)
@@ -167,7 +167,6 @@ end
 
 function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
   if not isUserInput then return end
-
   local searchTerm = self:_GetEditBoxSearchTerm(editBox)
 
   if util.IsNilOrEmpty(searchTerm) then
