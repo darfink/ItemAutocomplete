@@ -10,7 +10,7 @@ local const = util.ReadOnly({
   disjunctItemIds = {172070, 122284, 180089},
   itemIdRanges = {{1, 39656}, {184865, 187130}},
   itemsQueriedPerUpdate = 50,
-  itemsSearchedPerUpdate = 1000,
+  itemsSearchedPerUpdate = 1500,
 })
 
 ------------------------------------------
