@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push: { tags: ['v*'] }
+
+jobs:
+  publish:
+    name: Create release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Package
+      env:
+        GITHUB_REPONAME: ${{ github.event.repository.name }}
+        GITHUB_WORKSPACE: ${{ github.workspace }}
+      run: |
+        pushd "$GITHUB_WORKSPACE/..""
+        zip -r "~/$GITHUB_REPONAME-${GITHUB_REF#refs/*/}.zip" "$GITHUB_REPONAME" -x "$GITHUB_REPONAME/.*"
+        popd
+
+    - name: Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: ~/${{ github.event.repository.name }}-*.zip
+        artifactErrorsFailBuild: true
+        token: ${{ secrets.GITHUB_TOKEN }}
