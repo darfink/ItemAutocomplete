@@ -17,8 +17,8 @@ jobs:
         GITHUB_REPONAME: ${{ github.event.repository.name }}
         GITHUB_WORKSPACE: ${{ github.workspace }}
       run: |
-        pushd "$GITHUB_WORKSPACE/..""
-        zip -r "~/$GITHUB_REPONAME-${GITHUB_REF#refs/*/}.zip" "$GITHUB_REPONAME" -x "$GITHUB_REPONAME/.*"
+        pushd "$GITHUB_WORKSPACE/.."
+        zip -r "$HOME/$GITHUB_REPONAME-${GITHUB_REF#refs/*/}.zip" "$GITHUB_REPONAME" -x "$GITHUB_REPONAME/.*"
         popd
 
     - name: Release
