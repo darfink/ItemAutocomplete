@@ -1,7 +1,7 @@
 ## Interface: 20501
 ## Title: Item Autocomplete
 ## Author: Darfink
-## Version: 2.5.1.38741
+## Version: 2
 ## SavedVariables: ItemAutocompleteDB
 ## X-ItemDatabaseVersion: 2
 
