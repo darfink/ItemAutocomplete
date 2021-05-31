@@ -21,7 +21,8 @@ ChatAutocompleteIntegrator.__index = ChatAutocompleteIntegrator
 function ChatAutocompleteIntegrator.New(itemDatabase)
   local self = setmetatable({}, ChatAutocompleteIntegrator)
 
-  self.buttonMenu = CreateFrame('Frame', nil, UIParent, BackdropTemplateMixin and "ItemAutocompleteButtonMenuTemplate")
+  self.buttonMenu = CreateFrame('Frame', nil, UIParent,
+                                BackdropTemplateMixin and "ItemAutocompleteButtonMenuTemplate")
   self.buttonMenu:Hide()
   self.buttonMenu:SetFrameLevel(10)
   self.caseInsensitive = nil
@@ -44,15 +45,12 @@ function ChatAutocompleteIntegrator:Enable()
   hooksecurefunc('ChatEdit_OnTextChanged', self.methods._OnChatTextChanged)
 
   self.original = {
-    substituteChatMessageBeforeSend = util.Hook(
-      'SubstituteChatMessageBeforeSend',
-      self.methods._HookChatMessageBeforeSend),
-    autoCompleteEditBoxOnEscapePressed = util.Hook(
-      'AutoCompleteEditBox_OnEscapePressed',
-      self.methods._HookChatEscapePressed),
-    chatEditCustomTabPressed = util.Hook(
-      'ChatEdit_CustomTabPressed',
-      self.methods._HookChatTabPressed),
+    substituteChatMessageBeforeSend = util.Hook('SubstituteChatMessageBeforeSend',
+                                                self.methods._HookChatMessageBeforeSend),
+    autoCompleteEditBoxOnEscapePressed = util.Hook('AutoCompleteEditBox_OnEscapePressed',
+                                                   self.methods._HookChatEscapePressed),
+    chatEditCustomTabPressed = util.Hook('ChatEdit_CustomTabPressed',
+                                         self.methods._HookChatTabPressed),
   }
 
   for i = 1, NUM_CHAT_WINDOWS do
@@ -79,11 +77,7 @@ function ChatAutocompleteIntegrator:Config()
   return {
     caseSensitivity = {
       type = 'select',
-      values = {
-        'Smart case',
-        'Case-insensitive',
-        'Case-sensitive',
-      },
+      values = { 'Smart case', 'Case-insensitive', 'Case-sensitive' },
       style = 'dropdown',
       name = 'Case sensitivity',
       desc = 'Specify the case sensitivity when searching.',
@@ -105,9 +99,7 @@ function ChatAutocompleteIntegrator:Config()
       name = 'Chat item link delimiters',
       desc = 'Specify the item link delimiters used.',
       default = '[]',
-      set = function(value)
-        self:SetItemLinkDelimiters(value:byte(1), value:byte(2))
-      end,
+      set = function(value) self:SetItemLinkDelimiters(value:byte(1), value:byte(2)) end,
     },
   }
 end
@@ -124,7 +116,9 @@ end
 ------------------------------------------
 
 function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, searchInfo)
-  if not editBox:IsShown() then return end
+  if not editBox:IsShown() then
+    return
+  end
 
   local searchTerm = self:_GetEditBoxSearchTerm(editBox)
 
@@ -132,20 +126,23 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
   if util.IsNilOrEmpty(searchTerm) or searchTerm:find(searchInfo.searchTerm, nil, true) ~= 1 then
     return self.buttonMenu:Hide()
   end
+
   self.buttonMenu:ClearAll()
   for item in items do
     self.buttonMenu:AddButton({
       text = item.link,
       value = item,
       onTooltipShow = function(tooltip) tooltip:SetItemByID(item.id) end,
-      onClick = function(_) self:_OnItemSelected(editBox, item) end
+      onClick = function(_) self:_OnItemSelected(editBox, item) end,
     })
   end
+
   if not self.buttonMenu:IsEmpty() then
     local offsetX = editBox:GetTextInsets() + searchInfo.searchOffsetX
     self.buttonMenu:SetParent(editBox)
     self.buttonMenu:ClearAllPoints()
-    self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX, editBox.autoCompleteYOffset or -AUTOCOMPLETE_DEFAULT_Y_OFFSET)
+    self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX,
+                             editBox.autoCompleteYOffset or -AUTOCOMPLETE_DEFAULT_Y_OFFSET)
     self.buttonMenu:Show()
   else
     self.buttonMenu:Hide()
@@ -164,7 +161,10 @@ function ChatAutocompleteIntegrator:_OnItemSelected(editBox, item)
 end
 
 function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
-  if not isUserInput then return end
+  if not isUserInput then
+    return
+  end
+
   local searchTerm = self:_GetEditBoxSearchTerm(editBox)
 
   if util.IsNilOrEmpty(searchTerm) then
@@ -199,9 +199,7 @@ function ChatAutocompleteIntegrator:_OnChatCursorChanged(editBox, x)
   self.editBoxCursorOffsets[editBox] = x
 end
 
-function ChatAutocompleteIntegrator:_OnChatFocusLost(_)
-  self.buttonMenu:Hide()
-end
+function ChatAutocompleteIntegrator:_OnChatFocusLost(_) self.buttonMenu:Hide() end
 
 function ChatAutocompleteIntegrator:_HookChatMessageBeforeSend(text)
   if self.buttonMenu:IsShown() then

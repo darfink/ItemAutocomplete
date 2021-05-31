@@ -39,7 +39,7 @@ end
 
 local eventSource = EventSource.New()
 
-eventSource:AddListener('ADDON_LOADED', function (addonName)
+eventSource:AddListener('ADDON_LOADED', function(addonName)
   if addonName ~= util.GetAddonName() then
     return
   end
@@ -51,9 +51,7 @@ eventSource:AddListener('ADDON_LOADED', function (addonName)
 
   local updateItemDatabase = function()
     util.PrettyPrint('Updating item database')
-    itemDatabase:UpdateItemsAsync(function()
-      util.PrettyPrint('The database has been updated.')
-    end)
+    itemDatabase:UpdateItemsAsync(function() util.PrettyPrint('The database has been updated.') end)
   end
 
   if itemDatabase:IsEmpty() or itemDatabase:IsObsolete() then

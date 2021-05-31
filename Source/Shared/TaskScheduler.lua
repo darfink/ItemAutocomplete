@@ -30,10 +30,7 @@ end
 
 function TaskScheduler:Queue(info)
   local taskId = self.taskIncrementor
-  self.tasks[taskId] = {
-    onFinish = info.onFinish,
-    thread = coroutine.create(info.task),
-  }
+  self.tasks[taskId] = { onFinish = info.onFinish, thread = coroutine.create(info.task) }
 
   self.taskIncrementor = self.taskIncrementor + 1
   self.updateFrame:Show()
@@ -50,9 +47,7 @@ function TaskScheduler:Dequeue(taskId)
   return true
 end
 
-function TaskScheduler:IsScheduled(taskId)
-  return self.tasks[taskId] ~= nil
-end
+function TaskScheduler:IsScheduled(taskId) return self.tasks[taskId] ~= nil end
 
 ------------------------------------------
 -- Private methods

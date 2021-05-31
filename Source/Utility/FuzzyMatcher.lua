@@ -113,14 +113,28 @@ local bonusExactMatch = scoreMatch
 
 local function GetCharacterClass(char)
   if char <= utf8.maxAscii then
-    if char >= 97 and char <= 122 then return charLower end
-    if char >= 65 and char <= 90 then return charUpper end
-    if char >= 48 and char <= 57 then return charNumber end
+    if char >= 97 and char <= 122 then
+      return charLower
+    end
+    if char >= 65 and char <= 90 then
+      return charUpper
+    end
+    if char >= 48 and char <= 57 then
+      return charNumber
+    end
   else
-    if utf8.IsLowerCaseLetter(char) then return charLower end
-    if utf8.IsUpperCaseLetter(char) then return charUpper end
-    if utf8.IsLetter(char) then return charLetter end
-    if utf8.IsDigit(char) then return charNumber end
+    if utf8.IsLowerCaseLetter(char) then
+      return charLower
+    end
+    if utf8.IsUpperCaseLetter(char) then
+      return charUpper
+    end
+    if utf8.IsLetter(char) then
+      return charLetter
+    end
+    if utf8.IsDigit(char) then
+      return charNumber
+    end
   end
 
   return charNonWord
@@ -129,7 +143,8 @@ end
 local function GetBonusFor(prevClass, class)
   if prevClass == charNonWord and class ~= charNonWord then
     return bonusBoundary
-  elseif prevClass == charLower and class == charUpper or prevClass ~= charNumber and class == charNumber then
+  elseif prevClass == charLower and class == charUpper or prevClass ~= charNumber and class ==
+    charNumber then
     return bonusCamel123
   elseif class == charNonWord then
     return bonusNonWord

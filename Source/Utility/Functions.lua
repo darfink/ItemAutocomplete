@@ -14,25 +14,23 @@ local addonName = select(1, ...)
 ------------------------------------------
 
 -- Returns the addon's name
-function export.GetAddonName()
-  return addonName
-end
+function export.GetAddonName() return addonName end
 
 -- Returns a field's value from the addon's meta data
-function export.GetAddonMetadata(field)
-  return GetAddOnMetadata(addonName, field)
-end
+function export.GetAddonMetadata(field) return GetAddOnMetadata(addonName, field) end
 
 -- Prints an addon message to the default chat frame
 function export.PrettyPrint(...)
-  local args = table.concat({...}, ' ')
+  local args = table.concat({ ... }, ' ')
   local message = string.format('|cFFFFA500[%s]|r: %s', addonName, args)
   DEFAULT_CHAT_FRAME:AddMessage(message)
 end
 
 -- Dumps a value to console
 local function Dump(table, indent)
-  if not indent then indent = 0 end
+  if not indent then
+    indent = 0
+  end
   for k, v in pairs(table) do
     local formatting = string.rep('  ', indent) .. k .. ': '
     if type(v) == 'table' then
@@ -70,32 +68,28 @@ function export.Abort()
 end
 
 -- Returns true if a string is nil or empty
-function export.IsNilOrEmpty(string)
-  return string == nil or string == ''
-end
+function export.IsNilOrEmpty(string) return string == nil or string == '' end
 
 -- Returns a read only version of a table
 function export.ReadOnly(table)
   return setmetatable({}, {
     __index = table,
     __newindex = function() error('Attempt to modify read-only table') end,
-    __metatable = false
+    __metatable = false,
   })
 end
 
 -- Returns a table which exposes context bound methods
 function export.ContextBinder(context)
   return setmetatable({}, {
-    __index = function (self, key)
+    __index = function(self, key)
       local method = context[key]
 
       if type(method) ~= 'function' then
         error('Unknown method ' .. key)
       end
 
-      self[key] = function(...)
-        return method(context, ...)
-      end
+      self[key] = function(...) return method(context, ...) end
 
       return rawget(self, key)
     end,
@@ -106,7 +100,9 @@ end
 -- Returns whether a string contains uppercase or not
 function export.ContainsUppercase(text)
   for _, codePoint in utf8.CodePoints(text) do
-    if utf8.IsUpperCaseLetter(codePoint) then return true end
+    if utf8.IsUpperCaseLetter(codePoint) then
+      return true
+    end
   end
   return false
 end

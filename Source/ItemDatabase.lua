@@ -7,8 +7,8 @@ local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 -- Consts
 local const = util.ReadOnly({
   -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
-  disjunctItemIds = {172070, 122284, 180089},
-  itemIdRanges = {{1, 39656}, {184865, 187130}},
+  disjunctItemIds = { 172070, 122284, 180089 },
+  itemIdRanges = { { 1, 39656 }, { 184865, 187130 } },
   itemsQueriedPerUpdate = 50,
   itemsSearchedPerUpdate = 1500,
 })
@@ -48,20 +48,14 @@ function ItemDatabase:AddItemById(itemId)
   -- The item info may not yet exist, in that case it's received asynchronously
   -- from the server via the GET_ITEM_INFO_RECEIVED event.
   if itemName ~= nil and not self:_IsDevItem(itemId, itemName) then
-    self.itemsById[itemId] = {
-      id = itemId,
-      name = itemName,
-      link = itemLink,
-    }
+    self.itemsById[itemId] = { id = itemId, name = itemName, link = itemLink }
     return true
   else
     return false
   end
 end
 
-function ItemDatabase:GetItemById(itemId)
-  return self.itemsById[itemId]
-end
+function ItemDatabase:GetItemById(itemId) return self.itemsById[itemId] end
 
 function ItemDatabase:FindItemsAsync(options, callback)
   -- This is a balance between responsiveness and frame drops
@@ -79,7 +73,9 @@ function ItemDatabase:FindItemsAsync(options, callback)
 end
 
 function ItemDatabase:UpdateItemsAsync(callback)
-  if self:IsUpdating() then return end
+  if self:IsUpdating() then
+    return
+  end
 
   wipe(self.itemsById)
   for _, itemId in ipairs(const.disjunctItemIds) do
@@ -97,23 +93,18 @@ function ItemDatabase:IsObsolete()
   return (self.databaseInfo.version or 0) < latestVersion
 end
 
-function ItemDatabase:IsEmpty()
-  return next(self.itemsById) == nil
-end
+function ItemDatabase:IsEmpty() return next(self.itemsById) == nil end
 
-function ItemDatabase:IsUpdating()
-  return self.taskScheduler:IsScheduled(self.updateItemsTaskId)
-end
+function ItemDatabase:IsUpdating() return self.taskScheduler:IsScheduled(self.updateItemsTaskId) end
 
-function ItemDatabase:ItemIterator()
-  return pairs(self.itemsById)
-end
+function ItemDatabase:ItemIterator() return pairs(self.itemsById) end
 
 ------------------------------------------
 -- Private methods
 ------------------------------------------
 
 function ItemDatabase:_IsDevItem(itemId, itemName)
+  -- LuaFormatter off
   if itemId == 19971 then return false end
   if itemName:match('Monster %-') then return true end
   if itemName:match('DEPRECATED') then return true end
@@ -129,6 +120,8 @@ function ItemDatabase:_IsDevItem(itemId, itemName)
   if itemName:match('Test$') then return true end
   if itemName:match('TEST') then return true end
   if itemName == 'test' then return true end
+  -- LuaFormatter on
+
   return false
 end
 
@@ -147,7 +140,7 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
   end
 
   for _, range in pairs(const.itemIdRanges) do
-    for itemId=range[1], range[2] do
+    for itemId = range[1], range[2] do
       itemCount = itemCount + 1
       if C_Item.DoesItemExistByID(itemId) then
         self:AddItemById(itemId)

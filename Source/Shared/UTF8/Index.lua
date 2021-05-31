@@ -88,14 +88,10 @@ export.maxAscii = maxAscii
 -- this halves the execution time of the fuzzy search algorithm. The downside is
 -- that the index value returned by the iterator may not be what is expected;
 -- it's the byte index of the *next* code point (not the current one).
-function export.CodePoints(string)
-  return CodePoint, string, 1
-end
+function export.CodePoints(string) return CodePoint, string, 1 end
 
 -- Returns whether the character is a letter or not
-function export.IsLetter(input)
-  return not not charsets.Letters[GetCharacterCodePoint(input)]
-end
+function export.IsLetter(input) return not not charsets.Letters[GetCharacterCodePoint(input)] end
 
 -- Returns whether the character is an upper case letter or not
 function export.IsUpperCaseLetter(input)
@@ -108,9 +104,7 @@ function export.IsLowerCaseLetter(input)
 end
 
 -- Returns whether the character is a digit or not
-function export.IsDigit(input)
-  return not not charsets.Digits[GetCharacterCodePoint(input)]
-end
+function export.IsDigit(input) return not not charsets.Digits[GetCharacterCodePoint(input)] end
 
 -- Converts a character to lower case
 function export.ToLower(input)

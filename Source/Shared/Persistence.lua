@@ -20,10 +20,7 @@ function Persistence.New(persistentTableName)
 
   local realm = GetRealmName()
   if persistentTable.realms[realm] == nil then
-    persistentTable.realms[realm] = {
-      characterItems = {},
-      items = {},
-    }
+    persistentTable.realms[realm] = { characterItems = {}, items = {} }
   end
 
   local self = setmetatable({}, Persistence)

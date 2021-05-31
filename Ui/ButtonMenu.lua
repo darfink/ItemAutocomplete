@@ -5,13 +5,18 @@ select(2, ...) 'Ui.ButtonMenu'
 ------------------------------------------
 function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
   buttonMenu:SetBackdrop({
-    bgFile="Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-    edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",
-    tile=1, tileSize=10, edgeSize=10,
-    insets={left=3, right=3, top=3, bottom=3}
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = 1,
+    tileSize = 10,
+    edgeSize = 10,
+    insets = { left = 3, right = 3, top = 3, bottom = 3 },
   });
-  buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b, 1)
-  buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b, 1)
+  buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g,
+                                    TOOLTIP_DEFAULT_COLOR.b, 1)
+  buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r,
+                              TOOLTIP_DEFAULT_BACKGROUND_COLOR.g,
+                              TOOLTIP_DEFAULT_BACKGROUND_COLOR.b, 1)
   buttonMenu:SetScript('OnHide', function() buttonMenu:HideGameTooltipIfOwned() end)
   buttonMenu.selectedButtonIndex = nil
   buttonMenu.buttonCount = 0
@@ -20,7 +25,8 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
   buttonMenu.baseHeight = 40
 
   function buttonMenu:SelectButton(buttonIndex)
-    assert(buttonIndex == nil or buttonIndex >= 1 and buttonIndex <= self.buttonCount, 'Button index is out of bounds')
+    assert(buttonIndex == nil or buttonIndex >= 1 and buttonIndex <= self.buttonCount,
+           'Button index is out of bounds')
 
     local previousButton = self.buttons[self.selectedButtonIndex]
     local selectedButton = self.buttons[buttonIndex]
@@ -47,7 +53,9 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
   end
 
   function buttonMenu:IncrementSelection(decrement)
-    if self:IsEmpty() then return end
+    if self:IsEmpty() then
+      return
+    end
 
     local buttonIndex = self.selectedButtonIndex + (decrement and -1 or 1)
 
@@ -85,7 +93,9 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
 
   function buttonMenu:ClearAll()
 
-    if self:IsEmpty() then return end
+    if self:IsEmpty() then
+      return
+    end
     self:SelectButton(nil)
 
     for i = 1, self.buttonCount do
@@ -96,9 +106,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
     self:SetWidth(50)
   end
 
-  function buttonMenu:IsEmpty()
-    return self.buttonCount == 0
-  end
+  function buttonMenu:IsEmpty() return self.buttonCount == 0 end
 
   function buttonMenu:HideGameTooltipIfOwned()
     local owner = GameTooltip:GetOwner()
