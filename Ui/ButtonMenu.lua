@@ -1,17 +1,24 @@
 select(2, ...) 'Ui.ButtonMenu'
 
+-- Imports
+local util = require 'Utility.Functions'
+
 ------------------------------------------
 -- Global exports
 ------------------------------------------
 function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
-  buttonMenu:SetBackdrop({
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = 1,
-    tileSize = 10,
-    edgeSize = 10,
-    insets = { left = 3, right = 3, top = 3, bottom = 3 },
-  });
+  if util.IsBcc() then
+    Mixin(buttonMenu, BackdropTemplateMixin)
+    buttonMenu:SetBackdrop({
+      bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+      tile = 1,
+      tileSize = 10,
+      edgeSize = 10,
+      insets = { left = 3, right = 3, top = 3, bottom = 3 },
+    });
+  end
+
   buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g,
                                     TOOLTIP_DEFAULT_COLOR.b, 1)
   buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r,
@@ -94,10 +101,10 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
   end
 
   function buttonMenu:ClearAll()
-
     if self:IsEmpty() then
       return
     end
+
     self:SelectButton(nil)
 
     for i = 1, self.buttonCount do

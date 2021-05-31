@@ -64,13 +64,9 @@ function export.Hook(fn, detour)
   return original
 end
 
--- Aborts the execution flow whilst suppressing any error
-function export.Abort()
-  local originalErrorHandler = geterrorhandler()
-  seterrorhandler(function()
-    seterrorhandler(originalErrorHandler)
-  end)
-  error('ABORT')
+-- Returns whether the current client is TBC: Classic or not
+function export.IsBcc()
+  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 end
 
 -- Returns true if a string is nil or empty

@@ -1,5 +1,6 @@
 ## Interface: 20501
 ## Title: Item Autocomplete
+## Notes: Search and link items in the chat
 ## Author: Darfink
 ## Version: 2
 ## SavedVariables: ItemAutocompleteDB

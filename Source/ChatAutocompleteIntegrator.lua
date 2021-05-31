@@ -29,8 +29,7 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
   self:SetItemLinkDelimiters('[', ']')
 
   -- The visual menu to select item links
-  self.buttonMenu = CreateFrame('Frame', nil, UIParent,
-                                BackdropTemplateMixin and 'ItemAutocompleteButtonMenuTemplate')
+  self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
   self.buttonMenu:Hide()
   self.buttonMenu:SetFrameLevel(10)
 

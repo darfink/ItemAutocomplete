@@ -5,12 +5,18 @@ local util = require 'Utility.Functions'
 local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 
 -- Consts
-local const = util.ReadOnly({
-  -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
-  disjunctItemIds = { 172070, 122270, 122284, 180089 },
+local const = util.ReadOnly(util.IsBcc() and {
+  -- Find highest ID @ https://tbc.wowhead.com/items?filter=151;2;187130
+  disjunctItemIds = { 122270, 122284, 172070, 180089 },
   itemIdRanges = { { 1, 39656 }, { 184865, 187130 } },
   itemsQueriedPerUpdate = 50,
   itemsSearchedPerUpdate = 1500,
+} or {
+  -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
+  disjunctItemIds = { 122270, 122284, 172070, 180089 },
+  itemIdRanges = { { 1, 24283 }, { 184937, 184938 } },
+  itemsQueriedPerUpdate = 50,
+  itemsSearchedPerUpdate = 1000,
 })
 
 ------------------------------------------
