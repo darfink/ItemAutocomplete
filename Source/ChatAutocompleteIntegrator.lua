@@ -104,7 +104,7 @@ end
 -- Private methods
 ------------------------------------------
 
-function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, searchInfo)
+function ChatAutocompleteIntegrator:_OnItemQueryComplete(editBox, items, searchInfo)
   if not editBox:IsShown() then
     return
   end
@@ -158,6 +158,12 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
     return
   end
 
+  -- If it's potentially a secure command, abort to avoid runtime taint
+  if string.byte(editBox:GetText() or '') == string.byte('/') then
+    self.buttonMenu:Hide()
+    return
+  end
+
   local searchTerm = self:_GetEditBoxSearchTerm(editBox)
 
   if util.IsNilOrEmpty(searchTerm) then
@@ -171,7 +177,7 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
     limit = const.maxItems,
     caseInsensitive = self.caseInsensitive,
   }, function(items)
-    self:_OnItemSearchComplete(editBox, items, {
+    self:_OnItemQueryComplete(editBox, items, {
       searchTerm = searchTerm,
       cursorOffsetX = self.searchCursorOffsetX or self.editBoxCursorOffsets[editBox],
     })
