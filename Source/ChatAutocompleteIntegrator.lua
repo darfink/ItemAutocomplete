@@ -30,16 +30,15 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
 
   -- The visual menu to select item links
   self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
-  self.buttonMenu:Hide()
   self.buttonMenu:SetFrameLevel(10)
+  self.buttonMenu:Hide()
 
   -- A transparent frame to intercept key inputs
-  self.keyInterceptor = CreateFrame('Frame', nil, UIParent)
+  self.keyInterceptor = CreateFrame('Frame', nil, self.buttonMenu)
   self.keyInterceptor:SetFrameStrata('FULLSCREEN')
   self.keyInterceptor:EnableKeyboard(true)
   self.keyInterceptor:SetPropagateKeyboardInput(true)
   self.keyInterceptor:SetScript('OnKeyDown', self.methods._OnKeyDownIntercept)
-  self.keyInterceptor:Hide()
 
   return self
 end
@@ -52,8 +51,6 @@ function ChatAutocompleteIntegrator:Enable()
   -- These are not actual hooks, rather just listeners
   hooksecurefunc('ChatEdit_OnEditFocusLost', self.methods._OnChatFocusLost)
   hooksecurefunc('ChatEdit_OnTextChanged', self.methods._OnChatTextChanged)
-
-  self.keyInterceptor:Show()
 
   for i = 1, NUM_CHAT_WINDOWS do
     local chatFrameEditBox = _G['ChatFrame' .. i .. 'EditBox']
