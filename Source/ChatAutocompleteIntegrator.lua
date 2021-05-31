@@ -21,16 +21,26 @@ ChatAutocompleteIntegrator.__index = ChatAutocompleteIntegrator
 function ChatAutocompleteIntegrator.New(itemDatabase)
   local self = setmetatable({}, ChatAutocompleteIntegrator)
 
-  self.buttonMenu = CreateFrame('Frame', nil, UIParent,
-                                BackdropTemplateMixin and "ItemAutocompleteButtonMenuTemplate")
-  self.buttonMenu:Hide()
-  self.buttonMenu:SetFrameLevel(10)
   self.caseInsensitive = nil
   self.editBoxCursorOffsets = {}
   self.itemDatabase = itemDatabase
   self.methods = util.ContextBinder(self)
   self.searchCursorOffsetX = nil
   self:SetItemLinkDelimiters('[', ']')
+
+  -- The visual menu to select item links
+  self.buttonMenu = CreateFrame('Frame', nil, UIParent,
+                                BackdropTemplateMixin and 'ItemAutocompleteButtonMenuTemplate')
+  self.buttonMenu:Hide()
+  self.buttonMenu:SetFrameLevel(10)
+
+  -- A transparent frame to intercept key inputs
+  self.keyInterceptor = CreateFrame('Frame', nil, UIParent)
+  self.keyInterceptor:SetFrameStrata('FULLSCREEN')
+  self.keyInterceptor:EnableKeyboard(true)
+  self.keyInterceptor:SetPropagateKeyboardInput(true)
+  self.keyInterceptor:SetScript('OnKeyDown', self.methods._OnKeyDownIntercept)
+  self.keyInterceptor:Hide()
 
   return self
 end
@@ -44,33 +54,14 @@ function ChatAutocompleteIntegrator:Enable()
   hooksecurefunc('ChatEdit_OnEditFocusLost', self.methods._OnChatFocusLost)
   hooksecurefunc('ChatEdit_OnTextChanged', self.methods._OnChatTextChanged)
 
-  self.original = {
-    substituteChatMessageBeforeSend = util.Hook('SubstituteChatMessageBeforeSend',
-                                                self.methods._HookChatMessageBeforeSend),
-    autoCompleteEditBoxOnEscapePressed = util.Hook('AutoCompleteEditBox_OnEscapePressed',
-                                                   self.methods._HookChatEscapePressed),
-    chatEditCustomTabPressed = util.Hook('ChatEdit_CustomTabPressed',
-                                         self.methods._HookChatTabPressed),
-  }
+  self.keyInterceptor:Show()
 
   for i = 1, NUM_CHAT_WINDOWS do
-    local editBox = _G['ChatFrame' .. i .. 'EditBox']
-    editBox:HookScript('OnArrowPressed', self.methods._OnChatArrowPressed)
-    editBox:HookScript('OnCursorChanged', self.methods._OnChatCursorChanged)
+    local chatFrameEditBox = _G['ChatFrame' .. i .. 'EditBox']
+    chatFrameEditBox:HookScript('OnCursorChanged', function(editBox, cursorOffsetX)
+      self.editBoxCursorOffsets[editBox] = cursorOffsetX
+    end)
   end
-
-  self.buttonMenu:HookScript('OnShow', function(menu)
-    local parent = menu:GetParent()
-    menu.previousArrowKeyMode = parent:GetAltArrowKeyMode()
-    parent:SetAltArrowKeyMode(false)
-  end)
-
-  self.buttonMenu:HookScript('OnHide', function(menu)
-    if menu.previousArrowKeyMode then
-      menu:GetParent():SetAltArrowKeyMode(menu.previousArrowKeyMode)
-      menu.previousArrowKeyMode = nil
-    end
-  end)
 end
 
 function ChatAutocompleteIntegrator:Config()
@@ -144,7 +135,7 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
   end
 
   if not self.buttonMenu:IsEmpty() then
-    local offsetX = editBox:GetTextInsets() + searchInfo.searchOffsetX
+    local offsetX = editBox:GetTextInsets() + searchInfo.cursorOffsetX
     self.buttonMenu:SetParent(editBox)
     self.buttonMenu:ClearAllPoints()
     self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX,
@@ -186,63 +177,47 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
   }, function(items)
     self:_OnItemSearchComplete(editBox, items, {
       searchTerm = searchTerm,
-      searchOffsetX = self.searchCursorOffsetX or self.editBoxCursorOffsets[editBox],
+      cursorOffsetX = self.searchCursorOffsetX or self.editBoxCursorOffsets[editBox],
     })
   end)
 end
 
-function ChatAutocompleteIntegrator:_OnChatArrowPressed(_, key)
-  if self.buttonMenu:IsShown() then
-    if key == 'UP' then
+function ChatAutocompleteIntegrator:_OnKeyDownIntercept(_, key)
+  -- TODO: Perhaps allocate this statically (?)
+  local actions = {
+    ['TAB'] = function()
+      self.buttonMenu:IncrementSelection(IsShiftKeyDown())
+    end,
+    ['UP'] = function()
       self.buttonMenu:IncrementSelection(true)
-    elseif key == 'DOWN' then
+    end,
+    ['DOWN'] = function()
       self.buttonMenu:IncrementSelection(false)
+    end,
+    ['ESCAPE'] = function()
+      self.buttonMenu:Hide()
+    end,
+    ['ENTER'] = function()
+      local editBox = GetCurrentKeyBoardFocus()
+      self:_OnItemSelected(editBox, self.buttonMenu:GetSelection())
+    end,
+  }
+
+  if self.buttonMenu:IsShown() then
+    local action = actions[key]
+
+    if action ~= nil then
+      action()
+      self.keyInterceptor:SetPropagateKeyboardInput(false)
+      return
     end
   end
-end
 
-function ChatAutocompleteIntegrator:_OnChatCursorChanged(editBox, x)
-  self.editBoxCursorOffsets[editBox] = x
+  self.keyInterceptor:SetPropagateKeyboardInput(true)
 end
 
 function ChatAutocompleteIntegrator:_OnChatFocusLost(_)
   self.buttonMenu:Hide()
-end
-
-function ChatAutocompleteIntegrator:_HookChatMessageBeforeSend(text)
-  if self.buttonMenu:IsShown() then
-    local editBox = GetCurrentKeyBoardFocus()
-
-    -- Whilst hooking the 'enter pressed' event seems to be the most obvious, it
-    -- taints the runtime and prevents any secure commands from being executed
-    -- in the chat (e.g. /target). To circumvent this, a function run later in
-    -- the invocation chain is hooked instead - SubstituteChatMessageBeforeSend.
-    -- To actually prevent normal operations, the return value cannot be
-    -- utilized due to being unused. Instead an error is thrown whilst a
-    -- temporary error handler is set to avoid any interference for users.
-    self:_OnItemSelected(editBox, self.buttonMenu:GetSelection())
-    util.Abort()
-  end
-
-  return self.original.substituteChatMessageBeforeSend(text)
-end
-
-function ChatAutocompleteIntegrator:_HookChatEscapePressed(editBox)
-  if self.buttonMenu:IsShown() then
-    self.buttonMenu:Hide()
-    return true
-  end
-
-  return self.original.autoCompleteEditBoxOnEscapePressed(editBox)
-end
-
-function ChatAutocompleteIntegrator:_HookChatTabPressed(editBox)
-  if self.buttonMenu:IsShown() then
-    self.buttonMenu:IncrementSelection(IsShiftKeyDown())
-    return true
-  end
-
-  return self.original.chatEditCustomTabPressed(editBox)
 end
 
 function ChatAutocompleteIntegrator:_GetEditBoxSearchTerm(editBox)
