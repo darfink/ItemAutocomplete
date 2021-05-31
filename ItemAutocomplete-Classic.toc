@@ -2,7 +2,7 @@
 ## Title: Item Autocomplete
 ## Notes: Search and link items in the chat
 ## Author: Darfink
-## Version: 1.0.7
+## Version: 2.0.1
 ## SavedVariables: ItemAutocompleteDB
 ## X-ItemDatabaseVersion: 1
 
