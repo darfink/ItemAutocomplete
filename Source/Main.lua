@@ -18,7 +18,9 @@ local function RegisterOptions(addonName, persistence, config)
   local options = persistence:GetAccountItem('options')
   for name, input in pairs(config) do
     local originalSetter = input.set
-    input.get = function() return options[name] end
+    input.get = function()
+      return options[name]
+    end
     input.set = function(_, value)
       options[name] = value
       originalSetter(value)
@@ -51,7 +53,9 @@ eventSource:AddListener('ADDON_LOADED', function(addonName)
 
   local updateItemDatabase = function()
     util.PrettyPrint('Updating item database')
-    itemDatabase:UpdateItemsAsync(function() util.PrettyPrint('The database has been updated.') end)
+    itemDatabase:UpdateItemsAsync(function()
+      util.PrettyPrint('The database has been updated.')
+    end)
   end
 
   if itemDatabase:IsEmpty() or itemDatabase:IsObsolete() then

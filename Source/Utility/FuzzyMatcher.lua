@@ -218,4 +218,6 @@ end
 -- Exports
 ------------------------------------------
 
-export.New = function(...) return FuzzyMatcher.New(...) end
+export.New = function(...)
+  return FuzzyMatcher.New(...)
+end

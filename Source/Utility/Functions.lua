@@ -14,10 +14,14 @@ local addonName = select(1, ...)
 ------------------------------------------
 
 -- Returns the addon's name
-function export.GetAddonName() return addonName end
+function export.GetAddonName()
+  return addonName
+end
 
 -- Returns a field's value from the addon's meta data
-function export.GetAddonMetadata(field) return GetAddOnMetadata(addonName, field) end
+function export.GetAddonMetadata(field)
+  return GetAddOnMetadata(addonName, field)
+end
 
 -- Prints an addon message to the default chat frame
 function export.PrettyPrint(...)
@@ -63,18 +67,24 @@ end
 -- Aborts the execution flow whilst suppressing any error
 function export.Abort()
   local originalErrorHandler = geterrorhandler()
-  seterrorhandler(function() seterrorhandler(originalErrorHandler) end)
+  seterrorhandler(function()
+    seterrorhandler(originalErrorHandler)
+  end)
   error('ABORT')
 end
 
 -- Returns true if a string is nil or empty
-function export.IsNilOrEmpty(string) return string == nil or string == '' end
+function export.IsNilOrEmpty(string)
+  return string == nil or string == ''
+end
 
 -- Returns a read only version of a table
 function export.ReadOnly(table)
   return setmetatable({}, {
     __index = table,
-    __newindex = function() error('Attempt to modify read-only table') end,
+    __newindex = function()
+      error('Attempt to modify read-only table')
+    end,
     __metatable = false,
   })
 end
@@ -89,7 +99,9 @@ function export.ContextBinder(context)
         error('Unknown method ' .. key)
       end
 
-      self[key] = function(...) return method(context, ...) end
+      self[key] = function(...)
+        return method(context, ...)
+      end
 
       return rawget(self, key)
     end,

@@ -17,7 +17,9 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
   buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r,
                               TOOLTIP_DEFAULT_BACKGROUND_COLOR.g,
                               TOOLTIP_DEFAULT_BACKGROUND_COLOR.b, 1)
-  buttonMenu:SetScript('OnHide', function() buttonMenu:HideGameTooltipIfOwned() end)
+  buttonMenu:SetScript('OnHide', function()
+    buttonMenu:HideGameTooltipIfOwned()
+  end)
   buttonMenu.selectedButtonIndex = nil
   buttonMenu.buttonCount = 0
   buttonMenu.buttons = {}
@@ -106,7 +108,9 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
     self:SetWidth(50)
   end
 
-  function buttonMenu:IsEmpty() return self.buttonCount == 0 end
+  function buttonMenu:IsEmpty()
+    return self.buttonCount == 0
+  end
 
   function buttonMenu:HideGameTooltipIfOwned()
     local owner = GameTooltip:GetOwner()
@@ -140,7 +144,9 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
     end
 
     button:GetFontString():SetPoint('LEFT', button, 'LEFT', 15, 0)
-    button:SetScript('OnLeave', function() GameTooltip:Hide() end)
+    button:SetScript('OnLeave', function()
+      GameTooltip:Hide()
+    end)
     button:SetScript('OnEnter', button.ShowTooltip)
     button:SetScript('OnClick', function()
       if button.info.onClick ~= nil then

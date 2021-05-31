@@ -55,7 +55,9 @@ function ItemDatabase:AddItemById(itemId)
   end
 end
 
-function ItemDatabase:GetItemById(itemId) return self.itemsById[itemId] end
+function ItemDatabase:GetItemById(itemId)
+  return self.itemsById[itemId]
+end
 
 function ItemDatabase:FindItemsAsync(options, callback)
   -- This is a balance between responsiveness and frame drops
@@ -68,7 +70,9 @@ function ItemDatabase:FindItemsAsync(options, callback)
 
   self.findItemsTaskId = self.taskScheduler:Queue({
     onFinish = callback,
-    task = function() return self:_TaskFindItems(options) end,
+    task = function()
+      return self:_TaskFindItems(options)
+    end,
   })
 end
 
@@ -84,7 +88,9 @@ function ItemDatabase:UpdateItemsAsync(callback)
 
   self.updateItemsTaskId = self.taskScheduler:Queue({
     onFinish = callback,
-    task = function() return self:_TaskUpdateItems(const.itemsQueriedPerUpdate) end,
+    task = function()
+      return self:_TaskUpdateItems(const.itemsQueriedPerUpdate)
+    end,
   })
 end
 
@@ -93,11 +99,17 @@ function ItemDatabase:IsObsolete()
   return (self.databaseInfo.version or 0) < latestVersion
 end
 
-function ItemDatabase:IsEmpty() return next(self.itemsById) == nil end
+function ItemDatabase:IsEmpty()
+  return next(self.itemsById) == nil
+end
 
-function ItemDatabase:IsUpdating() return self.taskScheduler:IsScheduled(self.updateItemsTaskId) end
+function ItemDatabase:IsUpdating()
+  return self.taskScheduler:IsScheduled(self.updateItemsTaskId)
+end
 
-function ItemDatabase:ItemIterator() return pairs(self.itemsById) end
+function ItemDatabase:ItemIterator()
+  return pairs(self.itemsById)
+end
 
 ------------------------------------------
 -- Private methods
@@ -211,4 +223,6 @@ end
 -- Exports
 ------------------------------------------
 
-export.New = function(...) return ItemDatabase.New(...) end
+export.New = function(...)
+  return ItemDatabase.New(...)
+end

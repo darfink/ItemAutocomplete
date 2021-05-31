@@ -16,7 +16,9 @@ function TaskScheduler.New()
   local self = setmetatable({}, TaskScheduler)
 
   self.updateFrame = CreateFrame('Frame')
-  self.updateFrame:SetScript('OnUpdate', function() self:_OnUpdate() end)
+  self.updateFrame:SetScript('OnUpdate', function()
+    self:_OnUpdate()
+  end)
   self.updateFrame:Hide()
   self.taskIncrementor = 1
   self.tasks = {}
@@ -47,7 +49,9 @@ function TaskScheduler:Dequeue(taskId)
   return true
 end
 
-function TaskScheduler:IsScheduled(taskId) return self.tasks[taskId] ~= nil end
+function TaskScheduler:IsScheduled(taskId)
+  return self.tasks[taskId] ~= nil
+end
 
 ------------------------------------------
 -- Private methods
@@ -85,4 +89,6 @@ end
 -- Exports
 ------------------------------------------
 
-export.New = function(...) return TaskScheduler.New(...) end
+export.New = function(...)
+  return TaskScheduler.New(...)
+end

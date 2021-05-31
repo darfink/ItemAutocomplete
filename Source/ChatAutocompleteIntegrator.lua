@@ -99,7 +99,9 @@ function ChatAutocompleteIntegrator:Config()
       name = 'Chat item link delimiters',
       desc = 'Specify the item link delimiters used.',
       default = '[]',
-      set = function(value) self:SetItemLinkDelimiters(value:byte(1), value:byte(2)) end,
+      set = function(value)
+        self:SetItemLinkDelimiters(value:byte(1), value:byte(2))
+      end,
     },
   }
 end
@@ -132,8 +134,12 @@ function ChatAutocompleteIntegrator:_OnItemSearchComplete(editBox, items, search
     self.buttonMenu:AddButton({
       text = item.link,
       value = item,
-      onTooltipShow = function(tooltip) tooltip:SetItemByID(item.id) end,
-      onClick = function(_) self:_OnItemSelected(editBox, item) end,
+      onTooltipShow = function(tooltip)
+        tooltip:SetItemByID(item.id)
+      end,
+      onClick = function(_)
+        self:_OnItemSelected(editBox, item)
+      end,
     })
   end
 
@@ -199,7 +205,9 @@ function ChatAutocompleteIntegrator:_OnChatCursorChanged(editBox, x)
   self.editBoxCursorOffsets[editBox] = x
 end
 
-function ChatAutocompleteIntegrator:_OnChatFocusLost(_) self.buttonMenu:Hide() end
+function ChatAutocompleteIntegrator:_OnChatFocusLost(_)
+  self.buttonMenu:Hide()
+end
 
 function ChatAutocompleteIntegrator:_HookChatMessageBeforeSend(text)
   if self.buttonMenu:IsShown() then
@@ -273,4 +281,6 @@ end
 -- Exports
 ------------------------------------------
 
-export.New = function(...) return ChatAutocompleteIntegrator.New(...) end
+export.New = function(...)
+  return ChatAutocompleteIntegrator.New(...)
+end

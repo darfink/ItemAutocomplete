@@ -73,4 +73,6 @@ end
 -- Exports
 ------------------------------------------
 
-export.New = function(...) return Persistence.New(...) end
+export.New = function(...)
+  return Persistence.New(...)
+end
