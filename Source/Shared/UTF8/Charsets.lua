@@ -1,5 +1,7 @@
 select(2, ...) 'Shared.UTF8.Charsets'
 
+-- LuaFormatter off
+
 ------------------------------------------
 -- Locals
 ------------------------------------------
@@ -3520,6 +3522,8 @@ for k, t in pairs(pats) do
     end
   end
 end
+
+-- LuaFormatter on
 
 ------------------------------------------
 -- Exports
