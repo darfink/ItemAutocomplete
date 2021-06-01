@@ -35,8 +35,10 @@ local function Dump(table, indent)
   if not indent then
     indent = 0
   end
+
   for k, v in pairs(table) do
     local formatting = string.rep('  ', indent) .. k .. ': '
+
     if type(v) == 'table' then
       print(formatting)
       Dump(v, indent + 1)
@@ -55,13 +57,6 @@ function export.RegisterSlashCommand(command, callback)
   local identifier = (addonName .. '_' .. command):upper()
   _G['SLASH_' .. identifier .. '1'] = '/' .. command
   _G.SlashCmdList[identifier] = callback
-end
-
--- Hooks a global function and returns the original
-function export.Hook(fn, detour)
-  local original = _G[fn]
-  _G[fn] = detour
-  return original
 end
 
 -- Returns whether the current client is TBC: Classic or not
