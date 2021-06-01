@@ -21,9 +21,15 @@ jobs:
         zip -r "$HOME/$GITHUB_REPONAME-${GITHUB_REF#refs/*/}.zip" "$GITHUB_REPONAME" -x "$GITHUB_REPONAME/.*"
         popd
 
+    - name: Read changelog
+      id: read-changelog
+      uses: mindsers/changelog-reader-action@v2
+
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ~/${{ github.event.repository.name }}-*.zip
+        name: Release ${{ steps.read-changelog.outputs.version }}
         artifactErrorsFailBuild: true
+        artifacts: ~/${{ github.event.repository.name }}-*.zip
+        body: ${{ steps.read-changelog.outputs.changes }}
         token: ${{ secrets.GITHUB_TOKEN }}
