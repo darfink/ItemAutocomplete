@@ -33,7 +33,7 @@ function ChatAutocompleteIntegrator.New(itemDatabase)
   self.buttonMenu:SetFrameLevel(10)
   self.buttonMenu:Hide()
 
-  -- A transparent frame to intercept key inputs
+  -- An invisible frame to intercept key inputs
   self.keyInterceptor = CreateFrame('Frame', nil, self.buttonMenu)
   self.keyInterceptor:SetFrameStrata('FULLSCREEN')
   self.keyInterceptor:EnableKeyboard(true)
@@ -185,8 +185,7 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
 end
 
 function ChatAutocompleteIntegrator:_OnKeyDownIntercept(_, key)
-  -- TODO: Perhaps allocate this statically (?)
-  local actions = {
+  local action = ({
     ['TAB'] = function()
       self.buttonMenu:IncrementSelection(IsShiftKeyDown())
     end,
@@ -203,19 +202,13 @@ function ChatAutocompleteIntegrator:_OnKeyDownIntercept(_, key)
       local editBox = GetCurrentKeyBoardFocus()
       self:_OnItemSelected(editBox, self.buttonMenu:GetSelection())
     end,
-  }
+  })[key]
 
-  if self.buttonMenu:IsShown() then
-    local action = actions[key]
-
-    if action ~= nil then
-      action()
-      self.keyInterceptor:SetPropagateKeyboardInput(false)
-      return
-    end
+  if action ~= nil then
+    action()
   end
 
-  self.keyInterceptor:SetPropagateKeyboardInput(true)
+  self.keyInterceptor:SetPropagateKeyboardInput(action == nil)
 end
 
 function ChatAutocompleteIntegrator:_OnChatFocusLost(_)
