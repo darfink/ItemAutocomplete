@@ -74,7 +74,7 @@ function ItemDatabase:FindItemsAsync(options, callback)
   -- complete.
   self.taskScheduler:Dequeue(self.findItemsTaskId)
 
-  self.findItemsTaskId = self.taskScheduler:Queue({
+  self.findItemsTaskId = self.taskScheduler:Enqueue({
     onFinish = callback,
     task = function()
       return self:_TaskFindItems(options)
@@ -82,7 +82,7 @@ function ItemDatabase:FindItemsAsync(options, callback)
   })
 end
 
-function ItemDatabase:UpdateItemsAsync(callback)
+function ItemDatabase:UpdateItemsAsync(onFinish)
   if self:IsUpdating() then
     return
   end
@@ -92,8 +92,8 @@ function ItemDatabase:UpdateItemsAsync(callback)
     self:AddItemById(itemId)
   end
 
-  self.updateItemsTaskId = self.taskScheduler:Queue({
-    onFinish = callback,
+  self.updateItemsTaskId = self.taskScheduler:Enqueue({
+    onFinish = onFinish,
     task = function()
       return self:_TaskUpdateItems(const.itemsQueriedPerUpdate)
     end,
@@ -152,21 +152,22 @@ end
 
 function ItemDatabase:_TaskUpdateItems(itemsPerYield)
   local itemCount = 0
-  local itemCountTotal = 0
 
-  for _, range in pairs(const.itemIdRanges) do
-    itemCountTotal = itemCountTotal + range[2] - range[1] + 1
+  for _, range in ipairs(const.itemIdRanges) do
+    itemCount = itemCount + range[2] - range[1] + 1
   end
 
-  for _, range in pairs(const.itemIdRanges) do
+  local itemsProcessed = 0
+
+  for _, range in ipairs(const.itemIdRanges) do
     for itemId = range[1], range[2] do
-      itemCount = itemCount + 1
+      itemsProcessed = itemsProcessed + 1
       if C_Item.DoesItemExistByID(itemId) then
         self:AddItemById(itemId)
       end
 
-      if itemCount % itemsPerYield == 0 then
-        coroutine.yield(itemId / itemCountTotal)
+      if itemsProcessed % itemsPerYield == 0 then
+        coroutine.yield(itemsProcessed / itemCount)
       end
     end
   end

@@ -30,7 +30,7 @@ end
 -- Public methods
 ------------------------------------------
 
-function TaskScheduler:Queue(info)
+function TaskScheduler:Enqueue(info)
   local taskId = self.taskIncrementor
   self.tasks[taskId] = { onFinish = info.onFinish, thread = coroutine.create(info.task) }
 
