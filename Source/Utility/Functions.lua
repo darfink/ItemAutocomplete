@@ -64,6 +64,19 @@ function export.IsBcc()
   return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 end
 
+-- Merges zero or more tables
+function export.Merge(...)
+  local output = {}
+
+  for _, targ in ipairs({ ... }) do
+    for key, value in pairs(targ) do
+      output[key] = value
+    end
+  end
+
+  return output
+end
+
 -- Returns true if a string is nil or empty
 function export.IsNilOrEmpty(string)
   return string == nil or string == ''

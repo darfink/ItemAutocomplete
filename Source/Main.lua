@@ -62,9 +62,13 @@ eventSource:AddListener('ADDON_LOADED', function(addonName)
     updateItemDatabase()
   end
 
-  local config = chatAutocompleteIntegrator:Config()
-  chatAutocompleteIntegrator:Enable()
-
+  -- Both the item database and chat integration can be configured
+  local config = util.Merge(chatAutocompleteIntegrator:Config(), itemDatabase:Config())
   RegisterOptions(addonName, persistence, config)
+
+  -- Allow users to manually update the item database
   util.RegisterSlashCommand('iaupdate', updateItemDatabase)
+
+  -- Bootstrapping complete - enable chat integration
+  chatAutocompleteIntegrator:Enable()
 end)

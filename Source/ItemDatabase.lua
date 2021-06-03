@@ -9,14 +9,10 @@ local const = util.ReadOnly(util.IsBcc() and {
   -- Find highest ID @ https://tbc.wowhead.com/items?filter=151;2;187130
   disjunctItemIds = { 122270, 122284, 172070, 180089 },
   itemIdRanges = { { 1, 39656 }, { 184865, 187130 } },
-  itemsQueriedPerUpdate = 50,
-  itemsSearchedPerUpdate = 1500,
 } or {
   -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
   disjunctItemIds = { 122270, 122284, 172070, 180089 },
   itemIdRanges = { { 1, 24283 }, { 184937, 184938 } },
-  itemsQueriedPerUpdate = 50,
-  itemsSearchedPerUpdate = 1000,
 })
 
 ------------------------------------------
@@ -40,8 +36,30 @@ function ItemDatabase.New(persistence, eventSource, taskScheduler)
   self.itemsById = persistence:GetAccountItem('itemDatabase')
   self.databaseInfo = persistence:GetAccountItem('itemDatabaseInfo')
   self.taskScheduler = taskScheduler
+  self.itemsSearchedPerUpdate = nil
+  self.itemsQueriedPerUpdate = 50
 
   return self
+end
+
+function ItemDatabase:Config()
+  return {
+    itemsSearchedPerUpdate = {
+      type = 'range',
+      min = 1,
+      max = 100000,
+      softMin = 100,
+      softMax = 10000,
+      bigStep = 100,
+      name = 'Items searched per frame',
+      desc = 'Specify the number of items filtered per frame. ' ..
+        'A higher number will yield faster results, but cause a greater performance impact.',
+      default = 1000,
+      set = function(value)
+        self.itemsSearchedPerUpdate = value
+      end,
+    },
+  }
 end
 
 ------------------------------------------
@@ -67,7 +85,7 @@ end
 
 function ItemDatabase:FindItemsAsync(options, callback)
   -- This is a balance between responsiveness and frame drops
-  options.itemsPerYield = const.itemsSearchedPerUpdate
+  options.itemsPerYield = self.itemsSearchedPerUpdate
 
   -- Only one item query may be running at a time, therefore replace any
   -- scheduled task since the result will most likely be obsolete when it's
@@ -95,7 +113,7 @@ function ItemDatabase:UpdateItemsAsync(onFinish)
   self.updateItemsTaskId = self.taskScheduler:Enqueue({
     onFinish = onFinish,
     task = function()
-      return self:_TaskUpdateItems(const.itemsQueriedPerUpdate)
+      return self:_TaskUpdateItems(self.itemsQueriedPerUpdate)
     end,
   })
 end
