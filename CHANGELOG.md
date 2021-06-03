@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added 
 
+- Added config for items searched per frame
+
 ### Fixed
 
-- Fixed addon configuration not working on BCC.
+- Fixed options page not working on BCC.
 
 ### Changed
 
 - Updated dependency versions.
+- Changed default items searched/frame from 1500 -> 1000.
 
 [unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.1...HEAD
