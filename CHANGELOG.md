@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added 
 
-- Added config for items searched per frame
+- Added configurable option for items searched per frame.
 
 ### Fixed
 
