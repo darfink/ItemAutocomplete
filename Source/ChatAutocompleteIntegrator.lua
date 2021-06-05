@@ -218,7 +218,7 @@ end
 function ChatAutocompleteIntegrator:_GetEditBoxSearchTerm(editBox)
   local cursorPosition = editBox:GetCursorPosition()
   local text = editBox:GetText()
-  local activeText = editBox:GetText():sub(1, cursorPosition)
+  local activeText = text:sub(1, cursorPosition)
   local searchTerm, startIndex = self:_ExtractSearchTerm(activeText)
 
   if searchTerm == nil then
