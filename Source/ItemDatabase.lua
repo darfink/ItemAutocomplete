@@ -3,6 +3,7 @@ select(2, ...) 'ItemDatabase'
 -- Imports
 local util = require 'Utility.Functions'
 local FuzzyMatcher = require 'Utility.FuzzyMatcher'
+local utf8 = require 'Shared.UTF8'
 
 -- Consts
 local const = util.ReadOnly(util.IsBcc() and {
@@ -72,7 +73,13 @@ function ItemDatabase:AddItemById(itemId)
   -- The item info may not yet exist, in that case it's received asynchronously
   -- from the server via the GET_ITEM_INFO_RECEIVED event.
   if itemName ~= nil and not self:_IsDevItem(itemId, itemName) then
-    self.itemsById[itemId] = { id = itemId, name = itemName, link = itemLink }
+    -- Precalculate each code point to improve query performance
+    local itemNameCodePoints = {}
+    for _, codePoint in utf8.CodePoints(itemName) do
+      itemNameCodePoints[#itemNameCodePoints + 1] = codePoint
+    end
+
+    self.itemsById[itemId] = { id = itemId, name = itemNameCodePoints, link = itemLink }
     return true
   else
     return false

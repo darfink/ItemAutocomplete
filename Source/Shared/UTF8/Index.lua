@@ -12,11 +12,11 @@ local maxAscii = 127
 local function CodePoint(string, offset)
   offset = offset or 1
 
-  if offset > #string then
+  local char = string:byte(offset)
+
+  if char == nil then
     return nil
   end
-
-  local char = string:byte(offset)
 
   if char <= maxAscii then
     return offset + 1, char
@@ -78,9 +78,6 @@ end
 -- Exports
 ------------------------------------------
 
--- The maxium value of an ASCII character
-export.maxAscii = maxAscii
-
 -- Returns an iterator of an UTF-8 string's codepoints
 --
 -- This is intentionally a stateless iterator to improve performance and avoid
@@ -114,13 +111,11 @@ end
 
 -- Converts a character to lower case
 function export.ToLower(input)
-  if type(input) ~= 'number' then
-    error('not implemented')
-  end
-
   if input >= 65 and input <= 90 then
     return input + 32
-  elseif input > maxAscii then
+  end
+
+  if input > maxAscii then
     return casing.UpperToLowerByCodePoint[input] or input
   end
 

@@ -19,7 +19,6 @@ function FuzzyMatcher.New(pattern, caseInsensitive)
 
   self.caseInsensitive = caseInsensitive
   self.patternCodePoints = {}
-  self.textBuffer = {}
 
   for _, codePoint in utf8.CodePoints(pattern) do
     codePoint = caseInsensitive and utf8.ToLower(codePoint) or codePoint
@@ -33,33 +32,33 @@ end
 -- Public methods
 ------------------------------------------
 
-function FuzzyMatcher:Match(text)
-  if #self.patternCodePoints == 0 then
+-- Cache this for performance
+local lowerutf8 = utf8.ToLower
+
+function FuzzyMatcher:Match(codePoints)
+  -- Cache as many variables as possible to improve performance
+  local caseInsensitive = self.caseInsensitive
+  local patternCodePoints = self.patternCodePoints
+
+  if #patternCodePoints == 0 then
     return 1, 1, 0
   end
 
-  local textCodePoints = self.textBuffer
-  local codePointIndex = 0
   local pidx = 1
   local sidx = 0
   local eidx = 0
 
-  for _, codePoint in utf8.CodePoints(text) do
-    codePointIndex = codePointIndex + 1
-    textCodePoints[codePointIndex] = codePoint
+  for index = 1, #codePoints do
+    local codePoint = caseInsensitive and lowerutf8(codePoints[index]) or codePoints[index]
 
-    if self.caseInsensitive then
-      codePoint = utf8.ToLower(codePoint)
-    end
-
-    if codePoint == self.patternCodePoints[pidx] then
+    if codePoint == patternCodePoints[pidx] then
       if sidx < 1 then
-        sidx = codePointIndex
+        sidx = index
       end
 
       pidx = pidx + 1
-      if pidx > #self.patternCodePoints then
-        eidx = codePointIndex + 1
+      if pidx > #patternCodePoints then
+        eidx = index + 1
         break
       end
     end
@@ -69,13 +68,9 @@ function FuzzyMatcher:Match(text)
     pidx = pidx - 1
 
     for index = eidx - 1, sidx, -1 do
-      local codePoint = textCodePoints[index]
+      local codePoint = caseInsensitive and lowerutf8(codePoints[index]) or codePoints[index]
 
-      if self.caseInsensitive then
-        codePoint = utf8.ToLower(codePoint)
-      end
-
-      if codePoint == self.patternCodePoints[pidx] then
+      if codePoint == patternCodePoints[pidx] then
         pidx = pidx - 1
 
         if pidx < 1 then
@@ -85,7 +80,7 @@ function FuzzyMatcher:Match(text)
       end
     end
 
-    return sidx, eidx, self:_EvaluateBonus(textCodePoints, strlenutf8(text), sidx, eidx)
+    return sidx, eidx, self:_EvaluateBonus(codePoints, sidx, eidx)
   end
 
   return 0, 0, 0
@@ -103,16 +98,16 @@ local charNonWord = 5
 
 local scoreMatch = 16
 local scoreGapStart = -3
-local scoreGapExtention = -1
+local scoreGapExtension = -1
 local bonusBoundary = scoreMatch / 2
 local bonusNonWord = scoreMatch / 2
-local bonusCamel123 = bonusBoundary + scoreGapExtention
-local bonusConsecutive = -(scoreGapStart + scoreGapExtention)
+local bonusCamel123 = bonusBoundary + scoreGapExtension
+local bonusConsecutive = -(scoreGapStart + scoreGapExtension)
 local bonusFirstCharMultiplier = 2
 local bonusExactMatch = scoreMatch
 
 local function GetCharacterClass(char)
-  if char <= utf8.maxAscii then
+  if char <= 127 then
     if char >= 97 and char <= 122 then
       return charLower
     end
@@ -157,23 +152,23 @@ end
 -- Private methods
 ------------------------------------------
 
-function FuzzyMatcher:_EvaluateBonus(textCodePoints, textLength, sidx, eidx)
-  local pidx, score, inGap, consecutive, firstBonus = 1, 0, false, 0, 0
-  local prevClass = charNonWord
+function FuzzyMatcher:_EvaluateBonus(codePoints, sidx, eidx)
+  -- Cache as many variables as possible to improve performance
+  local caseInsensitive = self.caseInsensitive
+  local patternCodePoints = self.patternCodePoints
 
-  if sidx > 1 then
-    prevClass = GetCharacterClass(textCodePoints[sidx - 1])
-  end
+  local pidx, score, inGap, consecutive, firstBonus = 1, 0, false, 0, 0
+  local prevClass = sidx > 1 and GetCharacterClass(codePoints[sidx - 1]) or charNonWord
 
   for index = sidx, eidx - 1 do
-    local codePoint = textCodePoints[index]
+    local codePoint = codePoints[index]
     local class = GetCharacterClass(codePoint)
 
-    if self.caseInsensitive then
-      codePoint = utf8.ToLower(codePoint)
+    if caseInsensitive then
+      codePoint = lowerutf8(codePoint)
     end
 
-    if codePoint == self.patternCodePoints[pidx] then
+    if codePoint == patternCodePoints[pidx] then
       local bonus = GetBonusFor(prevClass, class)
       score = score + scoreMatch
 
@@ -190,7 +185,7 @@ function FuzzyMatcher:_EvaluateBonus(textCodePoints, textLength, sidx, eidx)
 
       if pidx == 1 then
         local additionalBonus = index == 1 and 2 or 1
-        score = score + bonus * math.pow(bonusFirstCharMultiplier, additionalBonus)
+        score = score + bonus * (bonusFirstCharMultiplier ^ additionalBonus)
       else
         score = score + bonus
       end
@@ -199,7 +194,7 @@ function FuzzyMatcher:_EvaluateBonus(textCodePoints, textLength, sidx, eidx)
       consecutive = consecutive + 1
       pidx = pidx + 1
     else
-      score = score + (inGap and scoreGapExtention or scoreGapStart)
+      score = score + (inGap and scoreGapExtension or scoreGapStart)
       inGap = true
       consecutive = 0
       firstBonus = 0
@@ -207,7 +202,7 @@ function FuzzyMatcher:_EvaluateBonus(textCodePoints, textLength, sidx, eidx)
     prevClass = class
   end
 
-  if consecutive == textLength then
+  if consecutive == #codePoints then
     score = score + bonusExactMatch
   end
 
