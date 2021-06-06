@@ -93,6 +93,10 @@ function ItemDatabase:GetItemById(itemId)
 end
 
 function ItemDatabase:FindItemsAsync(options, callback)
+  if self:IsUpdating() then
+    return false
+  end
+
   -- This is a balance between responsiveness and frame drops
   options.itemsPerYield = self.itemsSearchedPerUpdate
 
@@ -100,13 +104,14 @@ function ItemDatabase:FindItemsAsync(options, callback)
   -- scheduled task since the result will most likely be obsolete when it's
   -- complete.
   self.taskScheduler:Dequeue(self.findItemsTaskId)
-
   self.findItemsTaskId = self.taskScheduler:Enqueue({
     onFinish = callback,
     task = function()
       return self:_TaskFindItems(options)
     end,
   })
+
+  return true
 end
 
 function ItemDatabase:UpdateItemsAsync(onFinish)
