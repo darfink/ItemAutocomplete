@@ -59,7 +59,7 @@ eventSource:AddListener('ADDON_LOADED', function(addonName)
   end
 
   if itemDatabase:IsEmpty() or itemDatabase:IsObsolete() then
-    updateItemDatabase()
+    C_Timer.After(5, updateItemDatabase)
   end
 
   -- Both the item database and chat integration can be configured
