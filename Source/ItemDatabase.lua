@@ -6,14 +6,16 @@ local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 local utf8 = require 'Shared.UTF8'
 
 -- Consts
-local const = util.ReadOnly(util.IsBcc() and {
+local const = util.ReadOnly({
   -- Find highest ID @ https://tbc.wowhead.com/items?filter=151;2;187130
-  disjunctItemIds = { 122270, 122284, 172070, 180089 },
-  itemIdRanges = { { 1, 39656 }, { 184865, 187130 } },
-} or {
-  -- Find highest ID @ https://classic.wowhead.com/items?filter=151;2;24283
-  disjunctItemIds = { 122270, 122284, 172070, 180089 },
-  itemIdRanges = { { 1, 24283 }, { 184937, 184938 } },
+  itemIds = {
+    util.IsBcc() and { 1, 39656 } or { 1, 24283 }, -- Defaults
+    { 122270 }, -- WoW Token (AH)
+    { 122284 }, -- WoW Token
+    { 172070 }, -- Customer Service Package
+    { 180089 }, -- Panda Collar
+    util.IsBcc() and { 184865, 187130 } or { 184937, 184938 },
+  },
 })
 
 ------------------------------------------
@@ -112,11 +114,9 @@ function ItemDatabase:UpdateItemsAsync(onFinish)
     return
   end
 
+  -- Reset the current database
   wipe(self.itemsById)
-  for _, itemId in ipairs(const.disjunctItemIds) do
-    self:AddItemById(itemId)
-  end
-
+  self.databaseInfo.version = 0
   self.updateItemsTaskId = self.taskScheduler:Enqueue({
     onFinish = onFinish,
     task = function()
@@ -176,23 +176,20 @@ function ItemDatabase:_OnItemInfoReceived(itemId, success)
 end
 
 function ItemDatabase:_TaskUpdateItems(itemsPerYield)
-  local itemCount = 0
-
-  for _, range in ipairs(const.itemIdRanges) do
-    itemCount = itemCount + range[2] - range[1] + 1
-  end
-
   local itemsProcessed = 0
 
-  for _, range in ipairs(const.itemIdRanges) do
-    for itemId = range[1], range[2] do
-      itemsProcessed = itemsProcessed + 1
+  for _, range in ipairs(const.itemIds) do
+    local lowId, highId = range[1], range[2] or range[1]
+
+    for itemId = lowId, highId do
       if C_Item.DoesItemExistByID(itemId) then
         self:AddItemById(itemId)
       end
 
+      itemsProcessed = itemsProcessed + 1
+
       if itemsProcessed % itemsPerYield == 0 then
-        coroutine.yield(itemsProcessed / itemCount)
+        coroutine.yield()
       end
     end
   end
