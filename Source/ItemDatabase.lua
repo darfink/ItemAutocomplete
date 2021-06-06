@@ -57,7 +57,7 @@ function ItemDatabase:Config()
       name = 'Items searched per frame',
       desc = 'Specify the number of items filtered per frame. ' ..
         'A higher number will yield faster results, but cause a greater performance impact.',
-      default = 1000,
+      default = 2000,
       set = function(value)
         self.itemsSearchedPerUpdate = value
       end,
