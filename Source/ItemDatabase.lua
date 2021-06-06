@@ -163,6 +163,8 @@ function ItemDatabase:_IsDevItem(itemId, itemName)
   if itemName:match('Test$') then return true end
   if itemName:match('Test_') then return true end
   if itemName:match('TEST') then return true end
+  if itemName:match('UNUSED') then return true end
+  if itemName:match('^Unused ') then return true end
   if itemName == 'test' then return true end
   -- LuaFormatter on
 
