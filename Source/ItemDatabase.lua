@@ -152,26 +152,41 @@ end
 ------------------------------------------
 
 function ItemDatabase:_IsDevItem(itemId, itemName)
-  -- LuaFormatter off
-  if itemId == 19971 then return false end
-  if itemName:match('Monster %-') then return true end
-  if itemName:match('DEPRECATED') then return true end
-  if itemName:match('Dep[rt][ie]cated') then return true end
-  if itemName:match('DEP') then return true end
-  if itemName:match('DEBUG') then return true end
-  if itemName:match('%(old%d?%)') then return true end
-  if itemName:match('OLD') then return true end
-  if itemName:match('[ %(]test[%) ]') then return true end
-  if itemName:match('^test ') then return true end
-  if itemName:match('Testing ?%d?$') then return true end
-  if itemName:match('Test[%u) ]') then return true end
-  if itemName:match('Test$') then return true end
-  if itemName:match('Test_') then return true end
-  if itemName:match('TEST') then return true end
-  if itemName:match('UNUSED') then return true end
-  if itemName:match('^Unused ') then return true end
-  if itemName == 'test' then return true end
-  -- LuaFormatter on
+  local whitelistedIds = { 19971, 31716 }
+
+  for _, whitelistedId in ipairs(whitelistedIds) do
+    if itemId == whitelistedId then
+      return false
+    end
+  end
+
+  local devPatterns = {
+    -- LuaFormatter off
+    'Monster %-',
+    'DEPRECATED',
+    'Dep[rt][ie]cated',
+    'DEP',
+    'DEBUG',
+    '%(old%d?%)',
+    'OLD',
+    '[ %(]test[%) ]',
+    '^test ',
+    'Testing ?%d?$',
+    'Test[%u) ]',
+    'Test$',
+    'Test_',
+    'TEST',
+    'UNUSED',
+    '^Unused ',
+    '^test$',
+    -- LuaFormatter on
+  }
+
+  for _, pattern in ipairs(devPatterns) do
+    if itemName:match(pattern) then
+      return true
+    end
+  end
 
   return false
 end
