@@ -106,28 +106,28 @@ local bonusConsecutive = -(scoreGapStart + scoreGapExtension)
 local bonusFirstCharMultiplier = 2
 local bonusExactMatch = scoreMatch
 
-local function GetCharacterClass(char)
-  if char <= 127 then
-    if char >= 97 and char <= 122 then
+local function GetCharacterClass(codePoint)
+  if codePoint <= 127 then
+    if codePoint >= 97 and codePoint <= 122 then
       return charLower
     end
-    if char >= 65 and char <= 90 then
+    if codePoint >= 65 and codePoint <= 90 then
       return charUpper
     end
-    if char >= 48 and char <= 57 then
+    if codePoint >= 48 and codePoint <= 57 then
       return charNumber
     end
   else
-    if utf8.IsLowerCaseLetter(char) then
+    if utf8.IsLowerCaseLetter(codePoint) then
       return charLower
     end
-    if utf8.IsUpperCaseLetter(char) then
+    if utf8.IsUpperCaseLetter(codePoint) then
       return charUpper
     end
-    if utf8.IsLetter(char) then
+    if utf8.IsLetter(codePoint) then
       return charLetter
     end
-    if utf8.IsDigit(char) then
+    if utf8.IsDigit(codePoint) then
       return charNumber
     end
   end

@@ -18,9 +18,11 @@ local function RegisterOptions(addonName, persistence, config)
   local options = persistence:GetAccountItem('options')
   for name, input in pairs(config) do
     local originalSetter = input.set
+
     input.get = function()
       return options[name]
     end
+
     input.set = function(_, value)
       options[name] = value
       originalSetter(value)

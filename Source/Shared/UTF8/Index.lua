@@ -60,20 +60,6 @@ local function CodePoint(string, offset)
   return offset + 1, codePoint
 end
 
-local function GetCharacterCodePoint(input)
-  local inputType = type(input)
-
-  if inputType == 'string' then
-    local codePoint = select(2, CodePoint(input))
-    assert(codePoint ~= nil, 'bad argument (expected letter)')
-    return codePoint
-  elseif inputType == 'number' then
-    return input
-  end
-
-  error(string.format('bad argument (%s expected, got %s)', 'string/number', inputType))
-end
-
 ------------------------------------------
 -- Exports
 ------------------------------------------
@@ -82,31 +68,31 @@ end
 --
 -- This is intentionally a stateless iterator to improve performance and avoid
 -- allocations whilst iterating a string's code points. Profiling showed that
--- this halves the execution time of the fuzzy search algorithm. The downside is
--- that the index value returned by the iterator may not be what is expected;
--- it's the byte index of the *next* code point (not the current one).
+-- this halves the execution time of the iterator. The downside is that the
+-- index value returned by the iterator may not be what is expected; it's the
+-- byte index of the *next* code point (not the current one).
 function export.CodePoints(string)
   return CodePoint, string, 1
 end
 
 -- Returns whether the character is a letter or not
-function export.IsLetter(input)
-  return not not charsets.Letters[GetCharacterCodePoint(input)]
+function export.IsLetter(codePoint)
+  return not not charsets.Letters[codePoint]
 end
 
 -- Returns whether the character is an upper case letter or not
-function export.IsUpperCaseLetter(input)
-  return not not charsets.UpperCaseLetters[GetCharacterCodePoint(input)]
+function export.IsUpperCaseLetter(codePoint)
+  return not not charsets.UpperCaseLetters[codePoint]
 end
 
 -- Returns whether the character is a lower case letter or not
-function export.IsLowerCaseLetter(input)
-  return not not charsets.LowerCaseLetters[GetCharacterCodePoint(input)]
+function export.IsLowerCaseLetter(codePoint)
+  return not not charsets.LowerCaseLetters[codePoint]
 end
 
 -- Returns whether the character is a digit or not
-function export.IsDigit(input)
-  return not not charsets.Digits[GetCharacterCodePoint(input)]
+function export.IsDigit(codePoint)
+  return not not charsets.Digits[codePoint]
 end
 
 -- Converts a character to lower case
