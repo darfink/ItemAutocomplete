@@ -2,7 +2,6 @@ select(2, ...) 'ItemDatabase'
 
 -- Imports
 local util = require 'Utility.Functions'
-local FuzzyMatcher = require 'Utility.FuzzyMatcher'
 local utf8 = require 'Shared.UTF8'
 
 -- Consts
@@ -39,30 +38,9 @@ function ItemDatabase.New(persistence, eventSource, taskScheduler)
   self.itemsById = persistence:GetAccountItem('itemDatabase')
   self.databaseInfo = persistence:GetAccountItem('itemDatabaseInfo')
   self.taskScheduler = taskScheduler
-  self.itemsSearchedPerUpdate = nil
   self.itemsQueriedPerUpdate = 50
 
   return self
-end
-
-function ItemDatabase:Config()
-  return {
-    itemsSearchedPerUpdate = {
-      type = 'range',
-      min = 1,
-      max = 100000,
-      softMin = 100,
-      softMax = 10000,
-      bigStep = 100,
-      name = 'Items searched per frame',
-      desc = 'Specify the number of items filtered per frame. ' ..
-        'A higher number will yield faster results, but cause a greater performance impact.',
-      default = 2000,
-      set = function(value)
-        self.itemsSearchedPerUpdate = value
-      end,
-    },
-  }
 end
 
 ------------------------------------------
@@ -90,28 +68,6 @@ end
 
 function ItemDatabase:GetItemById(itemId)
   return self.itemsById[itemId]
-end
-
-function ItemDatabase:FindItemsAsync(options, callback)
-  if self:IsUpdating() then
-    return false
-  end
-
-  -- This is a balance between responsiveness and frame drops
-  options.itemsPerYield = self.itemsSearchedPerUpdate
-
-  -- Only one item query may be running at a time, therefore replace any
-  -- scheduled task since the result will most likely be obsolete when it's
-  -- complete.
-  self.taskScheduler:Dequeue(self.findItemsTaskId)
-  self.findItemsTaskId = self.taskScheduler:Enqueue({
-    onFinish = callback,
-    task = function()
-      return self:_TaskFindItems(options)
-    end,
-  })
-
-  return true
 end
 
 function ItemDatabase:UpdateItemsAsync(onFinish)
@@ -144,7 +100,7 @@ function ItemDatabase:IsUpdating()
 end
 
 function ItemDatabase:ItemIterator()
-  return pairs(self.itemsById)
+  return pairs(self:IsUpdating() and {} or self.itemsById)
 end
 
 ------------------------------------------
@@ -176,9 +132,10 @@ function ItemDatabase:_IsDevItem(itemId, itemName)
     'Test$',
     'Test_',
     'TEST',
+    '^test$',
     'UNUSED',
     '^Unused ',
-    '^test$',
+    'PH',
     -- LuaFormatter on
   }
 
@@ -218,57 +175,6 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
 
   self.databaseInfo.version = tonumber(util.GetAddonMetadata('X-ItemDatabaseVersion'))
   return 1
-end
-
-function ItemDatabase:_TaskFindItems(options)
-  local limit = options.limit or 1 / 0
-  local caseInsensitive = options.caseInsensitive
-
-  if caseInsensitive == nil then
-    -- Use smart case (i.e only check casing if the pattern contains uppercase letters)
-    caseInsensitive = not util.ContainsUppercase(options.pattern)
-  end
-
-  local fuzzyMatcher = FuzzyMatcher.New(options.pattern, caseInsensitive)
-  local foundItems = {}
-  local iterations = 0
-
-  -- The following is a trade-off between execution time & memory. Adding all
-  -- items to an array and sorting afterwards is O(nlogn), but requires a
-  -- complete duplicate of the item database. A heap is good in theory but
-  -- profiling shows it performs worst of all. The used solution is O(n²) due to
-  -- the inner loop being O(n). Using binary search for the insertion point is
-  -- also worse than insertion sort when a low 'limit' is used.
-  for _, item in self:ItemIterator() do
-    local startIndex, _, score = fuzzyMatcher:Match(item.name)
-
-    if startIndex ~= 0 then
-      local insertionPoint = #foundItems + 1
-      while insertionPoint > 1 and score > foundItems[insertionPoint - 1].score do
-        insertionPoint = insertionPoint - 1
-      end
-
-      if insertionPoint < limit then
-        table.insert(foundItems, insertionPoint, { item = item, score = score })
-
-        if #foundItems > limit then
-          foundItems[#foundItems] = nil
-        end
-      end
-    end
-
-    iterations = iterations + 1
-    if iterations % options.itemsPerYield == 0 then
-      coroutine.yield()
-    end
-  end
-
-  -- Return an iterator over all items found
-  local i = 0
-  return function()
-    i = i + 1
-    return foundItems[i] and foundItems[i].item
-  end
 end
 
 ------------------------------------------

@@ -136,7 +136,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
     button.ShowTooltip = function()
       if button.info.onTooltipShow ~= nil then
         GameTooltip:SetOwner(button, 'ANCHOR_RIGHT')
-        button.info.onTooltipShow(GameTooltip)
+        button.info.onTooltipShow(GameTooltip, button.info.value)
       end
     end
 

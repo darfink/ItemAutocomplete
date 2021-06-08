@@ -3,9 +3,6 @@ select(2, ...) 'ChatAutocompleteIntegrator'
 -- Imports
 local util = require 'Utility.Functions'
 
--- Consts
-local const = util.ReadOnly({ maxItems = 10 })
-
 ------------------------------------------
 -- Class definition
 ------------------------------------------
@@ -18,17 +15,16 @@ ChatAutocompleteIntegrator.__index = ChatAutocompleteIntegrator
 ------------------------------------------
 
 -- Creates a chat autocomplete menu
-function ChatAutocompleteIntegrator.New(itemDatabase)
+function ChatAutocompleteIntegrator.New()
   local self = setmetatable({}, ChatAutocompleteIntegrator)
 
-  self.caseInsensitive = nil
+  self.activeCompletionSource = nil
+  self.completionSources = {}
   self.editBoxCursorOffsets = {}
-  self.itemDatabase = itemDatabase
+  self.initialCursorOffsetX = nil
   self.methods = util.ContextBinder(self)
-  self.searchCursorOffsetX = nil
-  self:SetItemLinkDelimiters('[', ']')
 
-  -- The visual menu to select item links
+  -- The visual menu to select links
   self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
   self.buttonMenu:SetFrameLevel(10)
   self.buttonMenu:Hide()
@@ -60,51 +56,15 @@ function ChatAutocompleteIntegrator:Enable()
   end
 end
 
-function ChatAutocompleteIntegrator:Config()
-  return {
-    caseSensitivity = {
-      type = 'select',
-      values = { 'Smart case', 'Case-insensitive', 'Case-sensitive' },
-      style = 'dropdown',
-      name = 'Case sensitivity',
-      desc = 'Specify the case sensitivity when searching.',
-      default = 1,
-      set = function(value)
-        local map = { nil, true, false }
-        self.caseInsensitive = map[value]
-      end,
-    },
-    itemLinkDelimiters = {
-      type = 'select',
-      values = {
-        ['<>'] = 'Angle brackets — <>',
-        ['{}'] = 'Curly brackets — {}',
-        ['[]'] = 'Square brackets — []',
-        ['()'] = 'Parentheses — ()',
-      },
-      style = 'dropdown',
-      name = 'Chat item link delimiters',
-      desc = 'Specify the item link delimiters used.',
-      default = '[]',
-      set = function(value)
-        self:SetItemLinkDelimiters(value:byte(1), value:byte(2))
-      end,
-    },
-  }
-end
-
-function ChatAutocompleteIntegrator:SetItemLinkDelimiters(open, close)
-  self.itemLinkDelimiters = {
-    type(open) == 'string' and string.byte(open) or open,
-    type(close) == 'string' and string.byte(close) or close,
-  }
+function ChatAutocompleteIntegrator:AddCompletionSource(trigger, source)
+  self.completionSources[trigger] = source
 end
 
 ------------------------------------------
 -- Private methods
 ------------------------------------------
 
-function ChatAutocompleteIntegrator:_OnItemQueryComplete(editBox, items, searchInfo)
+function ChatAutocompleteIntegrator:_OnQueryComplete(editBox, entries, searchInfo)
   if not editBox:IsShown() then
     return
   end
@@ -117,15 +77,13 @@ function ChatAutocompleteIntegrator:_OnItemQueryComplete(editBox, items, searchI
   end
 
   self.buttonMenu:ClearAll()
-  for item in items do
+  for entry in entries do
     self.buttonMenu:AddButton({
-      text = item.link,
-      value = item,
-      onTooltipShow = function(tooltip)
-        tooltip:SetItemByID(item.id)
-      end,
+      text = entry.link,
+      value = entry,
+      onTooltipShow = self.activeCompletionSource.methods.SetupTooltip,
       onClick = function(_)
-        self:_OnItemSelected(editBox, item)
+        self:_OnEntrySelected(editBox, entry)
       end,
     })
   end
@@ -142,12 +100,12 @@ function ChatAutocompleteIntegrator:_OnItemQueryComplete(editBox, items, searchI
   end
 end
 
-function ChatAutocompleteIntegrator:_OnItemSelected(editBox, item)
+function ChatAutocompleteIntegrator:_OnEntrySelected(editBox, entry)
   local searchTerm, prefixText, suffixText = self:_GetEditBoxSearchTerm(editBox)
 
   if not util.IsNilOrEmpty(searchTerm) then
-    editBox:SetText(prefixText .. item.link .. suffixText)
-    editBox:SetCursorPosition(#prefixText + #item.link)
+    editBox:SetText(prefixText .. entry.link .. suffixText)
+    editBox:SetCursorPosition(#prefixText + #entry.link)
   end
 
   self.buttonMenu:Hide()
@@ -167,19 +125,16 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
   local searchTerm = self:_GetEditBoxSearchTerm(editBox)
 
   if util.IsNilOrEmpty(searchTerm) then
-    self.searchCursorOffsetX = searchTerm == '' and self.editBoxCursorOffsets[editBox] or nil
+    -- Save the cursor position for when the search was initiated
+    self.initialCursorOffsetX = searchTerm == '' and self.editBoxCursorOffsets[editBox] or nil
     self.buttonMenu:Hide()
     return
   end
 
-  self.itemDatabase:FindItemsAsync({
-    pattern = searchTerm,
-    limit = const.maxItems,
-    caseInsensitive = self.caseInsensitive,
-  }, function(items)
-    self:_OnItemQueryComplete(editBox, items, {
+  self.activeCompletionSource:QueryAsync(searchTerm, function(entries)
+    self:_OnQueryComplete(editBox, entries, {
       searchTerm = searchTerm,
-      cursorOffsetX = self.searchCursorOffsetX or self.editBoxCursorOffsets[editBox],
+      cursorOffsetX = self.initialCursorOffsetX or self.editBoxCursorOffsets[editBox],
     })
   end)
 end
@@ -200,7 +155,7 @@ function ChatAutocompleteIntegrator:_OnKeyDownIntercept(_, key)
     end,
     ['ENTER'] = function()
       local editBox = GetCurrentKeyBoardFocus()
-      self:_OnItemSelected(editBox, self.buttonMenu:GetSelection())
+      self:_OnEntrySelected(editBox, self.buttonMenu:GetSelection())
     end,
   })[key]
 
@@ -232,16 +187,23 @@ function ChatAutocompleteIntegrator:_GetEditBoxSearchTerm(editBox)
 end
 
 function ChatAutocompleteIntegrator:_ExtractSearchTerm(text)
-  local open, close = unpack(self.itemLinkDelimiters)
+  local closeDelimiter = string.byte(']')
 
   for i = #text, 1, -1 do
-    if text:byte(i) == close then
+    local character = text:byte(i)
+
+    -- Regardless of trigger, all links are closed by the same delimiter
+    if character == closeDelimiter then
       return nil, 0
     end
 
-    if text:byte(i) == open then
-      return text:sub(i + 1), i
+    for trigger, source in pairs(self.completionSources) do
+      if character == trigger then
+        self.activeCompletionSource = source
+        return text:sub(i + 1), i
+      end
     end
+
   end
 
   return nil, 0

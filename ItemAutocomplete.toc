@@ -1,7 +1,7 @@
 ## Interface: 11307
 ## Title: Item Autocomplete
 ## Notes: Search and link items in the chat
-## Author: Darfink
+## Author: Elliott Linder
 ## Version: 2.0.1
 ## SavedVariables: ItemAutocompleteDB
 ## X-ItemDatabaseVersion: 3
@@ -21,5 +21,6 @@ Source\Shared\TaskScheduler.lua
 Source\Utility\Functions.lua
 Source\Utility\FuzzyMatcher.lua
 Source\ChatAutocompleteIntegrator.lua
+Source\CompletionSource.lua
 Source\ItemDatabase.lua
 Source\Main.lua
