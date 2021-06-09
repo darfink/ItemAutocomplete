@@ -10,11 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added 
 
 - Added configurable option for items searched per frame.
-- Added filter to remove "UNUSED" developer items.
+- Added configurable option for number of items displayed.
+- Added filter to remove unused ("UNUSED") developer items.
+- Added filter to remove placeholder ("PH") developer items.
 
 ### Fixed
 
-- Fixed options page not working on BCC.
+- Fixed configuration page not working on BCC.
 - Prevented item queries from running when updating database.
 
 ### Changed
