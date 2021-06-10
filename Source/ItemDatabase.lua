@@ -15,6 +15,7 @@ local const = util.ReadOnly({
     { 180089 }, -- Panda Collar
     util.IsBcc() and { 184865, 187130 } or { 184937, 184938 },
   },
+  itemsQueriedPerUpdate = 50,
 })
 
 ------------------------------------------
@@ -38,7 +39,6 @@ function ItemDatabase.New(persistence, eventSource, taskScheduler)
   self.itemsById = persistence:GetAccountItem('itemDatabase')
   self.databaseInfo = persistence:GetAccountItem('itemDatabaseInfo')
   self.taskScheduler = taskScheduler
-  self.itemsQueriedPerUpdate = 50
 
   return self
 end
@@ -81,7 +81,7 @@ function ItemDatabase:UpdateItemsAsync(onFinish)
   self.updateItemsTaskId = self.taskScheduler:Enqueue({
     onFinish = onFinish,
     task = function()
-      return self:_TaskUpdateItems(self.itemsQueriedPerUpdate)
+      return self:_TaskUpdateItems(const.itemsQueriedPerUpdate)
     end,
   })
 end
