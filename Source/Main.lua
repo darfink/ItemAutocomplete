@@ -73,11 +73,6 @@ local configDefinition = {
     fontSize = 'medium',
   },
   headerInteraction = { type = 'header', order = 1, name = 'Interaction' },
-  descriptionTrigger = {
-    type = 'description',
-    order = 1.3,
-    name = '|cffff8888NOTE: Changing the item completion trigger requires an interface reload to take effect.|r',
-  },
   caseInsensitive = {
     type = 'select',
     order = 1.1,
@@ -106,6 +101,11 @@ local configDefinition = {
     map = function(value)
       return string.byte(value)
     end,
+  },
+  descriptionTrigger = {
+    type = 'description',
+    order = 1.3,
+    name = '|cffff8888NOTE: Changing the item completion trigger requires an interface reload to take effect.|r',
   },
   headerQuery = { type = 'header', order = 2, name = 'Query' },
   entriesFilteredPerUpdate = {

@@ -187,12 +187,12 @@ function ChatAutocompleteIntegrator:_GetEditBoxSearchTerm(editBox)
 end
 
 function ChatAutocompleteIntegrator:_ExtractSearchTerm(text)
+  -- Regardless of trigger, all links are closed by the same delimiter
   local closeDelimiter = string.byte(']')
 
   for i = #text, 1, -1 do
     local character = text:byte(i)
 
-    -- Regardless of trigger, all links are closed by the same delimiter
     if character == closeDelimiter then
       return nil, 0
     end
