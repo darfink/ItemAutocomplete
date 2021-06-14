@@ -28,4 +28,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed default no. of items searched/frame from 1500 -> 2000.
 
 [unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.2...HEAD
-[1.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v2.0.1...v2.0.2
+[2.0.2]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.1...v2.0.2
