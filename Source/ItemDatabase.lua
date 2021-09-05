@@ -7,13 +7,22 @@ local utf8 = require 'Shared.UTF8'
 -- Consts
 local const = util.ReadOnly({
   -- Find highest ID @ https://tbc.wowhead.com/items?filter=151;2;187130
-  itemIds = {
-    util.IsBcc() and { 1, 39656 } or { 1, 24283 }, -- Defaults
+  itemIds = util.IsBcc() and {
+    { 1, 39656 }, -- Defaults
+    { 43516 }, -- Brutal Nether Drake
     { 122270 }, -- WoW Token (AH)
     { 122284 }, -- WoW Token
     { 172070 }, -- Customer Service Package
     { 180089 }, -- Panda Collar
-    util.IsBcc() and { 184865, 187130 } or { 184937, 184938 },
+    { 184865, 187815 },
+  } or {
+    { 1, 24283 }, -- Defaults
+    { 43516 }, -- Brutal Nether Drake
+    { 122270 }, -- WoW Token (AH)
+    { 122284 }, -- WoW Token
+    { 172070 }, -- Customer Service Package
+    { 180089 }, -- Panda Collar
+    { 184937, 184938 },
   },
   itemsQueriedPerUpdate = 50,
 })
