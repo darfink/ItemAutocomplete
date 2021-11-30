@@ -6,7 +6,7 @@ local utf8 = require 'Shared.UTF8'
 
 -- Consts
 local const = util.ReadOnly({
-  -- Find highest ID @ https://tbc.wowhead.com/items?filter=151;2;187130
+  -- See: https://tbc.wowhead.com/items?filter=151;1;187815
   itemIds = util.IsBcc() and {
     { 1, 39656 }, -- Defaults
     { 43516 }, -- Brutal Nether Drake
@@ -15,14 +15,15 @@ local const = util.ReadOnly({
     { 172070 }, -- Customer Service Package
     { 180089 }, -- Panda Collar
     { 184865, 187815 },
-  } or {
+  } or { -- See: https://classic.wowhead.com/items?filter=151;2;24284
     { 1, 24283 }, -- Defaults
-    { 43516 }, -- Brutal Nether Drake
     { 122270 }, -- WoW Token (AH)
     { 122284 }, -- WoW Token
     { 172070 }, -- Customer Service Package
     { 180089 }, -- Panda Collar
-    { 184937, 184938 },
+    { 184937, 184938 }, -- Chronoboon Displacers
+    { 189419, 189421 }, -- Fire Resist Gear
+    { 189426, 189427 }, -- Raid Consumables
   },
   itemsQueriedPerUpdate = 50,
 })

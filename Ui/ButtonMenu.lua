@@ -1,23 +1,18 @@
 select(2, ...) 'Ui.ButtonMenu'
 
--- Imports
-local util = require 'Utility.Functions'
-
 ------------------------------------------
 -- Global exports
 ------------------------------------------
 function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
-  if util.IsBcc() then
-    Mixin(buttonMenu, BackdropTemplateMixin)
-    buttonMenu:SetBackdrop({
-      bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-      tile = 1,
-      tileSize = 10,
-      edgeSize = 10,
-      insets = { left = 3, right = 3, top = 3, bottom = 3 },
-    });
-  end
+  Mixin(buttonMenu, BackdropTemplateMixin)
+  buttonMenu:SetBackdrop({
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = 1,
+    tileSize = 10,
+    edgeSize = 10,
+    insets = { left = 3, right = 3, top = 3, bottom = 3 },
+  });
 
   buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g,
                                     TOOLTIP_DEFAULT_COLOR.b, 1)
