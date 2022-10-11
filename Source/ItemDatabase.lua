@@ -8,7 +8,7 @@ local utf8 = require 'Shared.UTF8'
 local const = util.ReadOnly({
   -- See: https://tbc.wowhead.com/items?filter=151;1;187815
   itemIds = util.IsBcc() and {
-    { 1, 39656 }, -- Defaults
+    { 1, 54798 }, -- Defaults
     { 43516 }, -- Brutal Nether Drake
     { 122270 }, -- WoW Token (AH)
     { 122284 }, -- WoW Token
