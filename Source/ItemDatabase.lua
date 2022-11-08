@@ -16,8 +16,7 @@ local const = util.ReadOnly({
     { 180089 }, -- Panda Collar
     { 184865, 187815 },
   } or util.IsWotlk() and {
-    { 1, 54798 }, -- Defaults
-    { 43516 }, -- Brutal Nether Drake
+    { 1, 54811 }, -- Defaults
     { 122270 }, -- WoW Token (AH)
     { 122284 }, -- WoW Token
     { 172070 }, -- Customer Service Package
