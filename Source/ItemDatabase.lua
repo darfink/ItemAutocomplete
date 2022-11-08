@@ -126,12 +126,19 @@ end
 
 function ItemDatabase:_IsDevItem(itemId, itemName)
   local whitelistedIds = { 19971, 31716 }
+  local blacklistedIds = { 50815, 50257 }
 
   for _, whitelistedId in ipairs(whitelistedIds) do
     if itemId == whitelistedId then
       return false
     end
   end
+  
+  for _, blacklistedId in ipairs(blacklistedIds) do
+    if itemId == blacklistedId then
+      return true
+    end
+  end  
 
   local devPatterns = {
     -- LuaFormatter off
@@ -153,6 +160,7 @@ function ItemDatabase:_IsDevItem(itemId, itemName)
     'UNUSED',
     '^Unused ',
     'PH',
+    'Monster,',
     -- LuaFormatter on
   }
 
