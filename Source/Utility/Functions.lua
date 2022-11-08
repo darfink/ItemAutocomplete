@@ -64,6 +64,11 @@ function export.IsBcc()
   return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 end
 
+-- Returns whether the current client is Wrath: Classic or not
+function export.IsWotlk()
+  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
+end
+
 -- Returns whether the current client is Season of Mastery or not
 function export.IsSom()
   return C_Seasons ~= nil and C_Seasons.HasActiveSeason() and
