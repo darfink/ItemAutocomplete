@@ -6,8 +6,15 @@ local utf8 = require 'Shared.UTF8'
 
 -- Consts
 local const = util.ReadOnly({
-  -- See: https://tbc.wowhead.com/items?filter=151;1;187815
-  itemIds = util.IsBcc() and {
+  itemIds = util.IsWrath() and {
+    { 1, 56806}, -- Defaults
+    { 122270 }, -- WoW Token (AH)
+    { 122284 }, -- WoW Token
+    { 172070 }, -- Customer Service Package
+    { 180089 }, -- Panda Collar
+    { 192455, 198647, 198665 }, -- Elite Expedition Supplies
+    { 198628, 198629, 198630, 198631, 198632, 198633, 198635, 198636, 198640, 198641, 198642, 198643, 198644 },
+  } or util.IsBcc() and { -- See: https://tbc.wowhead.com/items?filter=151;1;187815
     { 1, 39656 }, -- Defaults
     { 43516 }, -- Brutal Nether Drake
     { 122270 }, -- WoW Token (AH)
@@ -15,7 +22,7 @@ local const = util.ReadOnly({
     { 172070 }, -- Customer Service Package
     { 180089 }, -- Panda Collar
     { 184865, 187815 },
-  } or { -- See: https://classic.wowhead.com/items?filter=151;2;24284
+  } or util.IsSom and { -- See: https://classic.wowhead.com/items?filter=151;2;24284
     { 1, 24283 }, -- Defaults
     { 122270 }, -- WoW Token (AH)
     { 122284 }, -- WoW Token
