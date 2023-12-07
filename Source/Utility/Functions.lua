@@ -61,7 +61,7 @@ end
 
 -- Returns whether the current client is TBC: Classic or not
 function export.IsBcc()
-  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
 end
 
 -- Returns whether the current client is Season of Mastery or not
