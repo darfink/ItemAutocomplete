@@ -59,8 +59,8 @@ function export.RegisterSlashCommand(command, callback)
   _G.SlashCmdList[identifier] = callback
 end
 
--- Returns whether the current client is TBC: Classic or not
-function export.IsBcc()
+-- Returns whether the current client is WOTLK or not
+function export.IsWotlk()
   return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
 end
 
