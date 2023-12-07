@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.5] - 2023-12-07
+
+### Added 
+
+- Compatibility with SoD
+- Compatibility with WOTLK
+- Added new WOTLK items
+
 ## [2.0.4] - 2021-11-30
 
 ### Added 
@@ -43,7 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved item query implementation, resulting in 3x faster results.
 - Changed default no. of items searched/frame from 1500 -> 2000.
 
-[unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.4...HEAD
+[unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.5...HEAD
+[2.0.5]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.1...v2.0.2
