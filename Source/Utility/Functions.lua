@@ -70,6 +70,12 @@ function export.IsSom()
            (C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfMastery)
 end
 
+-- Returns whether the current client is Season of Discovery or not
+function export.IsSod()
+  return C_Seasons ~= nil and C_Seasons.HasActiveSeason() and
+           (C_Seasons.GetActiveSeason() == Enum.SeasonID.Placeholder)
+end
+
 -- Merges zero or more tables
 function export.Merge(...)
   local output = {}

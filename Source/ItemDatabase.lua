@@ -24,6 +24,8 @@ local const = util.ReadOnly({
     { 184937, 184938 }, -- Chronoboon Displacers
     { 189419, 189421 }, -- Fire Resist Gear
     { 189426, 189427 }, -- Raid Consumables
+    -- Season of Discovery
+    util.IsSod() and { 190179, 213088 } or nil,
   },
   itemsQueriedPerUpdate = 50,
 })
@@ -46,8 +48,8 @@ function ItemDatabase.New(persistence, eventSource, taskScheduler)
   self.methods = util.ContextBinder(self)
   self.eventSource = eventSource
   self.eventSource:AddListener('GET_ITEM_INFO_RECEIVED', self.methods._OnItemInfoReceived)
-  self.itemsById = persistence:GetAccountItem('itemDatabase')
-  self.databaseInfo = persistence:GetAccountItem('itemDatabaseInfo')
+  self.itemsById = persistence:GetRealmItem('itemDatabase')
+  self.databaseInfo = persistence:GetRealmItem('itemDatabaseInfo')
   self.taskScheduler = taskScheduler
 
   return self
