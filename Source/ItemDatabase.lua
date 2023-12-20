@@ -25,7 +25,7 @@ local const = util.ReadOnly({
     { 189419, 189421 }, -- Fire Resist Gear
     { 189426, 189427 }, -- Raid Consumables
     -- Season of Discovery
-    util.IsSod() and { 190179, 213088 } or nil,
+    util.IsSod() and { 190179, 215370 } or nil,
   },
   itemsQueriedPerUpdate = 50,
 })
@@ -131,6 +131,7 @@ function ItemDatabase:_IsDevItem(itemId, itemName)
   local devPatterns = {
     -- LuaFormatter off
     'Monster %-',
+    'Monster,',
     'DEPRECATED',
     'Dep[rt][ie]cated',
     'DEP',
