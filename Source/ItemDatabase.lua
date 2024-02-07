@@ -25,7 +25,7 @@ local const = util.ReadOnly({
     { 189419, 189421 }, -- Fire Resist Gear
     { 189426, 189427 }, -- Raid Consumables
     -- Season of Discovery
-    util.IsSod() and { 190179, 215370 } or nil,
+    util.IsSod() and { 190179, 217704 } or nil,
   },
   itemsQueriedPerUpdate = 50,
 })
