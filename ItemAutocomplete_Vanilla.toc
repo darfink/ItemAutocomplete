@@ -1,8 +1,8 @@
-## Interface: 11501
+## Interface: 11508
 ## Title: Item Autocomplete
 ## Notes: Search and link items in the chat
 ## Author: Elliott Linder
-## Version: 2.0.7
+## Version: 2.0.8
 ## SavedVariables: ItemAutocompleteDB
 ## X-ItemDatabaseVersion: 7
 
