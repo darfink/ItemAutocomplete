@@ -44,15 +44,15 @@ end
 ------------------------------------------
 
 function ChatAutocompleteIntegrator:Enable()
-  -- These are not actual hooks, rather just listeners
-  hooksecurefunc('ChatEdit_OnEditFocusLost', self.methods._OnChatFocusLost)
-  hooksecurefunc('ChatEdit_OnTextChanged', self.methods._OnChatTextChanged)
-
   for i = 1, NUM_CHAT_WINDOWS do
     local chatFrameEditBox = _G['ChatFrame' .. i .. 'EditBox']
-    chatFrameEditBox:HookScript('OnCursorChanged', function(editBox, cursorOffsetX)
-      self.editBoxCursorOffsets[editBox] = cursorOffsetX
-    end)
+    if chatFrameEditBox ~= nil then
+      chatFrameEditBox:HookScript('OnEditFocusLost', self.methods._OnChatFocusLost)
+      chatFrameEditBox:HookScript('OnTextChanged', self.methods._OnChatTextChanged)
+      chatFrameEditBox:HookScript('OnCursorChanged', function(editBox, cursorOffsetX)
+        self.editBoxCursorOffsets[editBox] = cursorOffsetX
+      end)
+    end
   end
 end
 
