@@ -4,18 +4,16 @@ select(2, ...) 'ItemDatabase'
 local util = require 'Utility.Functions'
 local utf8 = require 'Shared.UTF8'
 
--- Consts
-local const = util.ReadOnly({
-  -- See: https://tbc.wowhead.com/items?filter=151;1;187815
-  itemIds = util.IsWotlk() and {
-    { 1, 54798 }, -- Defaults
-    { 122270 }, -- WoW Token (AH)
-    { 122284 }, -- WoW Token
-    { 172070 }, -- Customer Service Package
-    { 180089 }, -- Panda Collar
-    { 192455, 198647, 198665 }, -- Elite Expedition Supplies
-    { 198628, 198644 },
-  } or { -- See: https://classic.wowhead.com/items?filter=151;2;24284
+-- Build the item id ranges for each version
+local function AppendRanges(out, ranges)
+  for i = 1, #ranges do
+    out[#out + 1] = ranges[i]
+  end
+end
+
+local baseRangesByExpansion = {
+  -- See: https://classic.wowhead.com/items?filter=151;2;24284
+  [_G.WOW_PROJECT_CLASSIC] = {
     { 1, 24283 }, -- Defaults
     { 122270 }, -- WoW Token (AH)
     { 122284 }, -- WoW Token
@@ -24,11 +22,64 @@ local const = util.ReadOnly({
     { 184937, 184938 }, -- Chronoboon Displacers
     { 189419, 189421 }, -- Fire Resist Gear
     { 189426, 189427 }, -- Raid Consumables
-    -- Season of Discovery
-    util.IsSod() and { 190179, 217704 } or nil,
   },
-  itemsQueriedPerUpdate = 50,
-})
+  -- See: https://tbc.wowhead.com/items?filter=151;1;187815
+  [_G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC] = {
+    { 1, 187815 }, -- Defaults
+    { 190179, 190181 }, --  Incubus quest items
+    { 190186, 190187 }, --  Incubus quest items
+    { 190232 }, --  Incubus quest items
+    { 190309 }, --  Incubus quest items
+    { 190325 }, --  Incubus quest items
+    { 190307, 190308 }, -- Fire festival torches
+    { 191060 }, -- Magtheridon gems
+    { 191061 }, -- Brilliant Glass
+    { 209611, 209618 }, -- Insignia of the Alliance
+    { 209619, 209626 }, -- Insignia of the Horde
+    { 212160 }, -- Chronoboon Displacer
+    { 234465 }, -- Reins of the Swift Spectral Tiger
+    { 260221 }, -- Shop mounts/pets
+    { 260433 }, -- Shop mounts/pets
+    { 260438 }, -- Shop mounts/pets
+    { 260622 }, -- Shop mounts/pets
+    { 260759 }, -- Shop mounts/pets
+    { 265826 }, -- Communal Keys
+    { 265830 }, -- Communal Keys
+    { 265843 }, -- Communal Keys
+    { 265845 }, -- Communal Keys
+    { 265847 }, -- Communal Keys
+    { 265849 }, -- Communal Keys
+    { 265851 }, -- Communal Keys
+    { 265853 }, -- Communal Keys
+  },
+  -- See: https://www.wowhead.com/wotlk/items?filter=151;1;54798
+  -- (The below list is likely incomplete)
+  [_G.WOW_PROJECT_WRATH_CLASSIC] = {
+    { 1, 54798 }, -- Defaults
+    { 122270 }, -- WoW Token (AH)
+    { 122284 }, -- WoW Token
+    { 172070 }, -- Customer Service Package
+    { 180089 }, -- Panda Collar
+    { 192455 }, -- Elite Expedition Supplies
+    { 198647 }, -- Elite Expedition Supplies
+    { 198665 }, -- Elite Expedition Supplies
+    { 198628, 198644 },
+  },
+}
+
+local sodExtras = { { 190179, 217704 } }
+
+local function BuildItemIdRanges()
+  local ranges = {}
+  AppendRanges(ranges, assert(baseRangesByExpansion[_G.WOW_PROJECT_ID]))
+  if util.IsSod() then
+    AppendRanges(ranges, sodExtras)
+  end
+  return ranges
+end
+
+-- Consts
+local const = util.ReadOnly({ itemIds = BuildItemIdRanges(), itemsQueriedPerUpdate = 50 })
 
 ------------------------------------------
 -- Class definition

@@ -59,17 +59,6 @@ function export.RegisterSlashCommand(command, callback)
   _G.SlashCmdList[identifier] = callback
 end
 
--- Returns whether the current client is WOTLK or not
-function export.IsWotlk()
-  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
-end
-
--- Returns whether the current client is Season of Mastery or not
-function export.IsSom()
-  return C_Seasons ~= nil and C_Seasons.HasActiveSeason() and
-           (C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfMastery)
-end
-
 -- Returns whether the current client is Season of Discovery or not
 function export.IsSod()
   return C_Seasons ~= nil and C_Seasons.HasActiveSeason() and
