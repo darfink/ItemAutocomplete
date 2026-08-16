@@ -1,4 +1,4 @@
-## Interface: 11509
+## Interface: 20506
 ## Title: Item Autocomplete
 ## Notes: Search and link items in the chat
 ## Author: Elliott Linder

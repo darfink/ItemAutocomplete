@@ -2,9 +2,9 @@
 ## Title: Item Autocomplete
 ## Notes: Search and link items in the chat
 ## Author: Elliott Linder
-## Version: 2.0.6
+## Version: 2.1.0
 ## SavedVariables: ItemAutocompleteDB
-## X-ItemDatabaseVersion: 5
+## X-ItemDatabaseVersion: 9
 
 # Libraries
 Libs\Libs.xml
