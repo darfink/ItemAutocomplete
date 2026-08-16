@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-08-15
+
+### Added
+
+- Compatibility with the Burning Crusade Anniversary client (2.5.6)
+- Item database covers the Burning Crusade item range
+
+### Changed
+
+- Item ID ranges are measured against the client's own item table rather than
+  estimated, which adds roughly 3800 items on Burning Crusade and extends the
+  Classic range from 24283 to 24358
+- Season of Discovery covers every seasonal item the client knows of, rather
+  than stopping at 217704
+
+### Fixed
+
+- Database updates no longer query the server for item IDs that do not exist.
+  The existence check relied on `C_Item.DoesItemExistByID`, which answers true
+  for every ID (WoWUIBugs #449), so roughly a third of each update was spent on
+  items the client had never heard of
+
+- Addon no longer errors on load now that `GetAddOnMetadata` and `GetItemInfo`
+  only exist under `C_AddOns` and `C_Item`
+- Chat integration works again on Classic Era 1.15.9, where the edit box
+  handlers `ChatEdit_OnTextChanged` and `ChatEdit_OnEditFocusLost` were replaced
+  by mixin methods
+- Options panel registers with the Settings API, via updated Ace3 libraries
+
 ## [2.0.8] - 2025-11-07
 
 ### Fixed
@@ -69,7 +98,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved item query implementation, resulting in 3x faster results.
 - Changed default no. of items searched/frame from 1500 -> 2000.
 
-[unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.8...HEAD
+[unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.8...v2.1.0
 [2.0.8]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.7...v2.0.8
 [2.0.7]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.6...v2.0.7
 [2.0.6]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.5...v2.0.6

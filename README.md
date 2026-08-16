@@ -4,6 +4,14 @@ This is an autocomplete addon for item links in WoW Classic. It integrates with 
 
 ![In-game demo](https://i.imgur.com/H70fus7.gif)
 
+## Compatibility
+
+| Client                          | TOC                           | Interface |
+| ------------------------------- | ----------------------------- | --------- |
+| Classic Era & 20th Anniversary  | `ItemAutocomplete_Vanilla.toc` | 11509     |
+| Burning Crusade Anniversary     | `ItemAutocomplete_TBC.toc`     | 20506     |
+| Wrath Classic                   | `ItemAutocomplete_Wrath.toc`   | 30400     |
+
 ## Features
 
 - **Item database:** It automatically scans the entire item database the first time it starts up, thereafter every single item is accessible. No need to wait for you to encounter it in the world! Perhaps it's time to lookup Ashbringer or Atiesh?
