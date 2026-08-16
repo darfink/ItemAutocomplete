@@ -9,6 +9,10 @@ local utf8 = require 'Shared.UTF8'
 
 local addonName = select(1, ...)
 
+-- The addon API moved into the 'C_AddOns' namespace, the globals were removed
+-- from the modern clients (e.g. Classic Era 1.15.9 & Anniversary 2.5.6).
+local GetAddOnMetadata = (C_AddOns and C_AddOns.GetAddOnMetadata) or _G.GetAddOnMetadata
+
 ------------------------------------------
 -- Exports
 ------------------------------------------
@@ -62,6 +66,14 @@ end
 -- Returns whether the current client is WOTLK or not
 function export.IsWotlk()
   return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
+end
+
+-- Returns whether the current client is TBC or not
+--
+-- This covers both the original Burning Crusade Classic and the Anniversary
+-- edition, they share the same project ID.
+function export.IsTbc()
+  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 end
 
 -- Returns whether the current client is Season of Mastery or not

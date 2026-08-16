@@ -4,29 +4,99 @@ select(2, ...) 'ItemDatabase'
 local util = require 'Utility.Functions'
 local utf8 = require 'Shared.UTF8'
 
--- Consts
-local const = util.ReadOnly({
-  -- See: https://tbc.wowhead.com/items?filter=151;1;187815
-  itemIds = util.IsWotlk() and {
-    { 1, 54798 }, -- Defaults
-    { 122270 }, -- WoW Token (AH)
-    { 122284 }, -- WoW Token
-    { 172070 }, -- Customer Service Package
-    { 180089 }, -- Panda Collar
-    { 192455, 198647, 198665 }, -- Elite Expedition Supplies
-    { 198628, 198644 },
-  } or { -- See: https://classic.wowhead.com/items?filter=151;2;24284
-    { 1, 24283 }, -- Defaults
-    { 122270 }, -- WoW Token (AH)
-    { 122284 }, -- WoW Token
+-- The item API moved into the 'C_Item' namespace, the globals were removed
+-- from the modern clients (e.g. Classic Era 1.15.9 & Anniversary 2.5.6).
+local GetItemInfo = (C_Item and C_Item.GetItemInfo) or _G.GetItemInfo
+local GetItemInfoInstant = (C_Item and C_Item.GetItemInfoInstant) or _G.GetItemInfoInstant
+
+-- Returns whether the client knows of an item or not
+--
+-- 'C_Item.DoesItemExistByID' cannot be used for this, it answers true for every
+-- ID (WoWUIBugs #449). 'GetItemInfoInstant' reads the client's own item table
+-- without a server round trip, so a nil result means there is nothing to add,
+-- and no item query is sent for an ID that does not exist.
+local function DoesItemExist(itemId)
+  return GetItemInfoInstant(itemId) ~= nil
+end
+
+-- Returns the item ID ranges to scan for the current client
+--
+-- Every ID in these ranges is probed during a database update, so keep them as
+-- tight as the client's item table allows. To refresh them after a patch, walk
+-- 'GetItemInfoInstant' over 1..250000 in game and note where the results
+-- cluster, that is the client's item table verbatim.
+local function GetItemIdRanges()
+  if util.IsWotlk() then
+    -- See: https://www.wowhead.com/wotlk/items?filter=151;1;54798
+    return {
+      { 1, 54798 }, -- Defaults
+      { 122270 }, -- WoW Token (AH)
+      { 122284 }, -- WoW Token
+      { 172070 }, -- Customer Service Package
+      { 180089 }, -- Panda Collar
+      { 192455, 198647, 198665 }, -- Elite Expedition Supplies
+      { 198628, 198644 },
+    }
+  end
+
+  if util.IsTbc() then
+    -- Measured against the item table of the 2.5.6 Anniversary client
+    return {
+      { 1, 39656 }, -- Defaults
+      { 43516 }, -- Brutal Nether Drake
+      { 122270, 122284 }, -- WoW Token
+      { 172070 }, -- Customer Service Package
+      { 180089 }, -- Panda Collar
+      { 184865, 187815 }, -- Burning Crusade Classic additions
+      { 190179, 190325 }, -- Anniversary additions
+      { 191060, 191061 },
+      { 194101 }, -- Netherwhelp's Collar
+      { 209611, 209626 }, -- Faction insignias
+      { 212160 }, -- Chronoboon Displacer
+      { 234465 }, -- Reins of the Swift Spectral Tiger
+    }
+  end
+
+  -- Measured against the item table of the 1.15.9 Classic Era client
+  local ranges = {
+    { 1, 24358 }, -- Defaults
+    { 122270, 122284 }, -- WoW Token
     { 172070 }, -- Customer Service Package
     { 180089 }, -- Panda Collar
     { 184937, 184938 }, -- Chronoboon Displacers
     { 189419, 189421 }, -- Fire Resist Gear
     { 189426, 189427 }, -- Raid Consumables
-    -- Season of Discovery
-    util.IsSod() and { 190179, 217704 } or nil,
-  },
+  }
+
+  if util.IsSod() then
+    -- Season of Discovery, which accounts for every remaining item the client
+    -- knows of. These are only worth scanning on a seasonal realm.
+    for _, range in ipairs({
+      { 190179, 190325 },
+      { 191204, 191666 },
+      { 202251, 202641 },
+      { 203723, 213737 },
+      { 214435 },
+      { 215111, 215824 },
+      { 216483, 218117 },
+      { 219021, 221981 },
+      { 222952, 224912 },
+      { 225675, 232652 },
+      { 233197, 240217 },
+      { 240742, 243345 },
+      { 244353, 244460 },
+      { 245675, 246062 },
+    }) do
+      ranges[#ranges + 1] = range
+    end
+  end
+
+  return ranges
+end
+
+-- Consts
+local const = util.ReadOnly({
+  itemIds = GetItemIdRanges(),
   itemsQueriedPerUpdate = 50,
 })
 
@@ -174,7 +244,7 @@ function ItemDatabase:_TaskUpdateItems(itemsPerYield)
     local lowId, highId = range[1], range[2] or range[1]
 
     for itemId = lowId, highId do
-      if C_Item.DoesItemExistByID(itemId) then
+      if DoesItemExist(itemId) then
         self:AddItemById(itemId)
       end
 

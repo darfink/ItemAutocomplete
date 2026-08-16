@@ -4,6 +4,19 @@ select(2, ...) 'ChatAutocompleteIntegrator'
 local util = require 'Utility.Functions'
 
 ------------------------------------------
+-- Private locals
+------------------------------------------
+
+-- Returns the number of chat windows the client provides
+--
+-- 'NUM_CHAT_WINDOWS' survives on modern clients only as a deprecation fallback,
+-- which players can switch off with the 'loadDeprecationFallbacks' CVar.
+local function GetChatWindowCount()
+  local chatFrameConstants = _G.Constants and _G.Constants.ChatFrameConstants
+  return (chatFrameConstants and chatFrameConstants.MaxChatWindows) or _G.NUM_CHAT_WINDOWS
+end
+
+------------------------------------------
 -- Class definition
 ------------------------------------------
 
@@ -44,15 +57,21 @@ end
 ------------------------------------------
 
 function ChatAutocompleteIntegrator:Enable()
-  -- These are not actual hooks, rather just listeners
-  hooksecurefunc('ChatEdit_OnEditFocusLost', self.methods._OnChatFocusLost)
-  hooksecurefunc('ChatEdit_OnTextChanged', self.methods._OnChatTextChanged)
-
-  for i = 1, NUM_CHAT_WINDOWS do
+  -- The chat edit box used to expose its handlers as the globals
+  -- 'ChatEdit_OnTextChanged' & 'ChatEdit_OnEditFocusLost'. They became mixin
+  -- methods in Classic Era 1.15.9 & Anniversary 2.5.6, so the scripts are
+  -- hooked per edit box instead, which works on every client.
+  for i = 1, GetChatWindowCount() do
     local chatFrameEditBox = _G['ChatFrame' .. i .. 'EditBox']
-    chatFrameEditBox:HookScript('OnCursorChanged', function(editBox, cursorOffsetX)
-      self.editBoxCursorOffsets[editBox] = cursorOffsetX
-    end)
+
+    if chatFrameEditBox ~= nil then
+      -- These are not actual hooks, rather just listeners
+      chatFrameEditBox:HookScript('OnEditFocusLost', self.methods._OnChatFocusLost)
+      chatFrameEditBox:HookScript('OnTextChanged', self.methods._OnChatTextChanged)
+      chatFrameEditBox:HookScript('OnCursorChanged', function(editBox, cursorOffsetX)
+        self.editBoxCursorOffsets[editBox] = cursorOffsetX
+      end)
+    end
   end
 end
 
