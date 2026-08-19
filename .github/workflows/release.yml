@@ -3,33 +3,47 @@ name: Release
 on:
   push: { tags: ['v*'] }
 
+permissions:
+  contents: write
+
 jobs:
   publish:
-    name: Create release
+    name: Create release and publish to CurseForge
     runs-on: ubuntu-latest
+
+    env:
+      # Create this at https://authors.curseforge.com/account/api-tokens
+      # and add it to the repository as the CF_API_KEY secret.
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Package
-      env:
-        GITHUB_REPONAME: ${{ github.event.repository.name }}
-        GITHUB_WORKSPACE: ${{ github.workspace }}
-      run: |
-        pushd "$GITHUB_WORKSPACE/.."
-        zip -r "$HOME/$GITHUB_REPONAME-${GITHUB_REF#refs/*/}.zip" "$GITHUB_REPONAME" -x "$GITHUB_REPONAME/.*"
-        popd
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Read changelog
       id: read-changelog
       uses: mindsers/changelog-reader-action@v2
+      with:
+        version: ${{ github.ref_name }}
+        path: ./CHANGELOG.md
+
+    - name: Prepare release changelog
+      env:
+        RELEASE_CHANGELOG: ${{ steps.read-changelog.outputs.changes }}
+      run: printf '%s\n' "$RELEASE_CHANGELOG" > CHANGELOG_RELEASE.md
+
+    - name: Package and publish to CurseForge
+      uses: BigWigsMods/packager@v2
+      with:
+        args: -p 356073
 
     - name: Release
       uses: ncipollo/release-action@v1
       with:
         name: Release ${{ steps.read-changelog.outputs.version }}
         artifactErrorsFailBuild: true
-        artifacts: ~/${{ github.event.repository.name }}-*.zip
+        artifacts: .release/*.zip
         body: ${{ steps.read-changelog.outputs.changes }}
         token: ${{ secrets.GITHUB_TOKEN }}

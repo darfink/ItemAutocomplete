@@ -1,0 +1,8 @@
+package-as: ItemAutocomplete
+
+manual-changelog:
+  filename: CHANGELOG_RELEASE.md
+  markup-type: markdown
+
+ignore:
+  - CHANGELOG_RELEASE.md
