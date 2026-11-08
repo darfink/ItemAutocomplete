@@ -6,3 +6,4 @@ manual-changelog:
 
 ignore:
   - CHANGELOG_RELEASE.md
+  - Tests

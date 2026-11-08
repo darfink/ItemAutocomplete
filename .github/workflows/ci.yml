@@ -12,7 +12,21 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y lua-check
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Run luacheck
       run: luacheck . --exclude-files ./Libs
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install LuaJIT
+      run: sudo apt-get update && sudo apt-get install -y luajit
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Run simulation harness
+      run: luajit Tests/Harness.lua

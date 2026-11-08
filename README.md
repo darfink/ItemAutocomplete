@@ -66,3 +66,13 @@ Not a keyboard person? No worries, just use the mouse.
 ## Internationalization
 
 Since version 1.0.4 Unicode support has been implemented, allowing any language to be used.
+## Development
+
+The item database and search can be tested outside of the game. The harness in `Tests/Harness.lua` stubs the WoW API with a simulated item server, which answers late, drops queries, or never answers them (as Forever does for hidden items). Run it from the repository root, along with the linter:
+
+```sh
+luajit Tests/Harness.lua
+luacheck . --exclude-files ./Libs
+```
+
+Both run in CI for every push and pull request.
