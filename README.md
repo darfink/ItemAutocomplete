@@ -12,7 +12,8 @@ This is an autocomplete addon for item links in World of Warcraft: Forever, reta
 | Retail (Midnight)               | `ItemAutocomplete_Mainline.toc` | 120105    |
 | Classic Era & 20th Anniversary  | `ItemAutocomplete_Vanilla.toc` | 11509     |
 | Burning Crusade Anniversary     | `ItemAutocomplete_TBC.toc`     | 20506     |
-| Wrath Classic                   | `ItemAutocomplete_Wrath.toc`   | 30400     |
+| Wrath Classic                   | `ItemAutocomplete_Wrath.toc`   | 30405     |
+| Mists of Pandaria Classic       | `ItemAutocomplete_Mists.toc`   | 50504     |
 
 ## Features
 

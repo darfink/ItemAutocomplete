@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Compatibility with World of Warcraft: Forever (1.60.1, interface 16001)
 - Compatibility with the retail client (12.1.5, interface 120105)
+- Compatibility with the Mists of Pandaria Classic client (interface 50504)
 - Items can be searched whilst the item database updates, the menu displays
   the update's progress
 - Add-on list icon
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Searches reject non-matching items without decoding their names, and narrow
   down the previous results whilst typing
 - Equally scored results favour the shorter name
+- Wrath Classic interface updated to 30405
 - The menu opens below the chat edit box when there's no room above it, and
   stays on screen
 

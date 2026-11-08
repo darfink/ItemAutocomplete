@@ -1,4 +1,4 @@
-## Interface: 30400
+## Interface: 30405
 ## Title: Item Autocomplete
 ## Notes: Search and link items in the chat
 ## Author: Elliott Linder
