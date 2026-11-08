@@ -2,9 +2,10 @@
 ## Title: Item Autocomplete
 ## Notes: Search and link items in the chat
 ## Author: Elliott Linder
-## Version: 2.1.0
+## Version: 2.2.0
 ## SavedVariables: ItemAutocompleteDB
-## X-ItemDatabaseVersion: 9
+## IconTexture: Interface\Icons\INV_Misc_Spyglass_03
+## X-ItemDatabaseVersion: 10
 
 # Libraries
 Libs\Libs.xml

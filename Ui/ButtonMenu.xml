@@ -22,7 +22,7 @@
 
     <Layers>
       <Layer level="ARTWORK">
-        <FontString inherits="GameFontDisableSmall" text="PRESS_TAB">
+        <FontString parentKey="footer" inherits="GameFontDisableSmall" text="PRESS_TAB">
           <Anchors>
             <Anchor point="BOTTOMLEFT">
               <Offset x="15" y="10" />

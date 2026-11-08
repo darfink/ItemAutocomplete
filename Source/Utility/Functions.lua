@@ -63,6 +63,29 @@ function export.RegisterSlashCommand(command, callback)
   _G.SlashCmdList[identifier] = callback
 end
 
+-- Returns whether the current client is Classic Era (incl. seasonal realms) or not
+function export.IsClassicEra()
+  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
+end
+
+-- Returns whether the current client is retail (i.e mainline) or not
+function export.IsRetail()
+  return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+end
+
+-- Returns whether the current client is World of Warcraft: Forever or not
+--
+-- Forever is a mainline client, and early builds reported the same project ID
+-- as retail, hence the interface version (e.g. 16001) is checked as well.
+function export.IsForever()
+  if _G.WOW_PROJECT_CAMELOT ~= nil and _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CAMELOT then
+    return true
+  end
+
+  local interfaceVersion = select(4, GetBuildInfo()) or 0
+  return interfaceVersion >= 16000 and interfaceVersion < 17000
+end
+
 -- Returns whether the current client is WOTLK or not
 function export.IsWotlk()
   return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
@@ -76,16 +99,32 @@ function export.IsTbc()
   return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 end
 
+-- Returns the active season's ID, or nil if the realm is not seasonal
+local function GetActiveSeason()
+  if C_Seasons == nil or not C_Seasons.HasActiveSeason() then
+    return nil
+  end
+
+  return C_Seasons.GetActiveSeason()
+end
+
+export.GetActiveSeason = GetActiveSeason
+
 -- Returns whether the current client is Season of Mastery or not
 function export.IsSom()
-  return C_Seasons ~= nil and C_Seasons.HasActiveSeason() and
-           (C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfMastery)
+  local seasonIds = Enum.SeasonID
+  return seasonIds ~= nil and GetActiveSeason() == seasonIds.SeasonOfMastery
 end
 
 -- Returns whether the current client is Season of Discovery or not
 function export.IsSod()
-  return C_Seasons ~= nil and C_Seasons.HasActiveSeason() and
-           (C_Seasons.GetActiveSeason() == Enum.SeasonID.Placeholder)
+  local seasonIds = Enum.SeasonID
+  return seasonIds ~= nil and GetActiveSeason() == seasonIds.Placeholder
+end
+
+-- Returns the client's build number
+function export.GetBuildNumber()
+  return tonumber((select(2, GetBuildInfo())))
 end
 
 -- Merges zero or more tables

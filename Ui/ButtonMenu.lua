@@ -14,11 +14,12 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
     insets = { left = 3, right = 3, top = 3, bottom = 3 },
   });
 
-  buttonMenu:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g,
-                                    TOOLTIP_DEFAULT_COLOR.b, 1)
-  buttonMenu:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r,
-                              TOOLTIP_DEFAULT_BACKGROUND_COLOR.g,
-                              TOOLTIP_DEFAULT_BACKGROUND_COLOR.b, 1)
+  -- Fall back to the classic tooltip colors, should a client not define them
+  local borderColor = TOOLTIP_DEFAULT_COLOR or { r = 1, g = 1, b = 1 }
+  local backgroundColor = TOOLTIP_DEFAULT_BACKGROUND_COLOR or { r = 0.09, g = 0.09, b = 0.19 }
+
+  buttonMenu:SetBackdropBorderColor(borderColor.r, borderColor.g, borderColor.b, 1)
+  buttonMenu:SetBackdropColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1)
   buttonMenu:SetScript('OnHide', function()
     buttonMenu:HideGameTooltipIfOwned()
   end)
@@ -27,6 +28,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
   buttonMenu.buttons = {}
   buttonMenu.buttonMargin = 30
   buttonMenu.baseHeight = 40
+  buttonMenu.minWidth = 50
 
   function buttonMenu:SelectButton(buttonIndex)
     assert(buttonIndex == nil or buttonIndex >= 1 and buttonIndex <= self.buttonCount,
@@ -89,10 +91,31 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
       self:SelectButton(1)
     end
 
-    local buttonWidth = button:GetFontString():GetStringWidth() + self.buttonMargin
-
     self:SetHeight(self.baseHeight + button:GetHeight() * self.buttonCount)
-    self:SetWidth(math.max(buttonWidth, self:GetWidth()))
+    self:_FitWidth(button:GetFontString())
+  end
+
+  -- Updates the text of the buttons with a value
+  function buttonMenu:UpdateButtonText(value, text)
+    for i = 1, self.buttonCount do
+      local button = self.buttons[i]
+
+      if button.info.value == value and text ~= nil then
+        button.info.text = text
+        button:SetText(text)
+        self:_FitWidth(button:GetFontString())
+      end
+    end
+  end
+
+  -- Sets the text below the buttons, by default the keyboard hint
+  function buttonMenu:SetFooterText(text)
+    self.footer:SetText(text or PRESS_TAB)
+    self:_FitWidth(self.footer)
+  end
+
+  function buttonMenu:_FitWidth(fontString)
+    self:SetWidth(math.max(fontString:GetStringWidth() + self.buttonMargin, self:GetWidth()))
   end
 
   function buttonMenu:ClearAll()
@@ -107,7 +130,7 @@ function _G.ItemAutocompleteButtonMenuOnLoad(buttonMenu)
     end
 
     self.buttonCount = 0
-    self:SetWidth(50)
+    self:SetWidth(self.minWidth)
   end
 
   function buttonMenu:IsEmpty()

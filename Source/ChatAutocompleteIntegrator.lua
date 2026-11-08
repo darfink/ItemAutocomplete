@@ -16,6 +16,11 @@ local function GetChatWindowCount()
   return (chatFrameConstants and chatFrameConstants.MaxChatWindows) or _G.NUM_CHAT_WINDOWS
 end
 
+-- Returns whether a value is a secret, which addons cannot inspect (retail)
+local function IsSecretValue(value)
+  return _G.issecretvalue ~= nil and _G.issecretvalue(value)
+end
+
 ------------------------------------------
 -- Class definition
 ------------------------------------------
@@ -28,26 +33,24 @@ ChatAutocompleteIntegrator.__index = ChatAutocompleteIntegrator
 ------------------------------------------
 
 -- Creates a chat autocomplete menu
-function ChatAutocompleteIntegrator.New()
+function ChatAutocompleteIntegrator.New(eventSource)
   local self = setmetatable({}, ChatAutocompleteIntegrator)
 
   self.activeCompletionSource = nil
+  self.activeEditBox = nil
   self.completionSources = {}
   self.editBoxCursorOffsets = {}
+  self.eventSource = eventSource
   self.initialCursorOffsetX = nil
+  self.keyInterceptor = nil
   self.methods = util.ContextBinder(self)
+  self.statusProvider = nil
 
   -- The visual menu to select links
   self.buttonMenu = CreateFrame('Frame', nil, UIParent, 'ItemAutocompleteButtonMenuTemplate')
   self.buttonMenu:SetFrameLevel(10)
+  self.buttonMenu:SetClampedToScreen(true)
   self.buttonMenu:Hide()
-
-  -- An invisible frame to intercept key inputs
-  self.keyInterceptor = CreateFrame('Frame', nil, self.buttonMenu)
-  self.keyInterceptor:SetFrameStrata('FULLSCREEN')
-  self.keyInterceptor:EnableKeyboard(true)
-  self.keyInterceptor:SetPropagateKeyboardInput(true)
-  self.keyInterceptor:SetScript('OnKeyDown', self.methods._OnKeyDownIntercept)
 
   return self
 end
@@ -73,15 +76,50 @@ function ChatAutocompleteIntegrator:Enable()
       end)
     end
   end
+
+  -- 'EnableKeyboard' is protected, so after a reload in combat the key
+  -- interceptor is created once combat ends. The mouse works until then.
+  if InCombatLockdown() then
+    self.eventSource:AddListener('PLAYER_REGEN_ENABLED', self.methods._CreateKeyInterceptor)
+  else
+    self:_CreateKeyInterceptor()
+  end
 end
 
 function ChatAutocompleteIntegrator:AddCompletionSource(trigger, source)
   self.completionSources[trigger] = source
 end
 
+-- Sets a function returning a status text, displayed in place of the hint
+function ChatAutocompleteIntegrator:SetStatusProvider(statusProvider)
+  self.statusProvider = statusProvider
+end
+
+-- Updates an entry's text, e.g. once its link has been received
+function ChatAutocompleteIntegrator:RefreshEntry(value)
+  if self.buttonMenu:IsShown() and self.activeCompletionSource ~= nil then
+    self.buttonMenu:UpdateButtonText(value, self.activeCompletionSource:GetEntryLink(value))
+  end
+end
+
 ------------------------------------------
 -- Private methods
 ------------------------------------------
+
+function ChatAutocompleteIntegrator:_CreateKeyInterceptor()
+  self.eventSource:RemoveListener('PLAYER_REGEN_ENABLED', self.methods._CreateKeyInterceptor)
+
+  -- An invisible frame to intercept key inputs
+  self.keyInterceptor = CreateFrame('Frame', nil, self.buttonMenu)
+  self.keyInterceptor:SetFrameStrata('FULLSCREEN')
+  self.keyInterceptor:EnableKeyboard(true)
+  self.keyInterceptor:SetPropagateKeyboardInput(true)
+  self.keyInterceptor:SetScript('OnKeyDown', self.methods._OnKeyDownIntercept)
+  self.keyInterceptor:SetScript('OnKeyUp', self.methods._OnKeyUpIntercept)
+
+  self.eventSource:AddListener('PLAYER_REGEN_DISABLED', self.methods._OnCombatStart)
+  self.eventSource:AddListener('PLAYER_REGEN_ENABLED', self.methods._OnCombatEnd)
+end
 
 function ChatAutocompleteIntegrator:_OnQueryComplete(editBox, entries, searchInfo)
   if not editBox:IsShown() then
@@ -95,12 +133,14 @@ function ChatAutocompleteIntegrator:_OnQueryComplete(editBox, entries, searchInf
     return self.buttonMenu:Hide()
   end
 
+  local completionSource = self.activeCompletionSource
+
   self.buttonMenu:ClearAll()
   for entry in entries do
     self.buttonMenu:AddButton({
-      text = entry.link,
+      text = completionSource:GetEntryLink(entry),
       value = entry,
-      onTooltipShow = self.activeCompletionSource.methods.SetupTooltip,
+      onTooltipShow = completionSource.methods.SetupTooltip,
       onClick = function(_)
         self:_OnEntrySelected(editBox, entry)
       end,
@@ -108,23 +148,44 @@ function ChatAutocompleteIntegrator:_OnQueryComplete(editBox, entries, searchInf
   end
 
   if not self.buttonMenu:IsEmpty() then
-    local offsetX = editBox:GetTextInsets() + searchInfo.cursorOffsetX
+    self.activeEditBox = editBox
+    self.buttonMenu:SetFooterText(self.statusProvider and self.statusProvider())
     self.buttonMenu:SetParent(editBox)
-    self.buttonMenu:ClearAllPoints()
-    self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX,
-                             editBox.autoCompleteYOffset or -AUTOCOMPLETE_DEFAULT_Y_OFFSET)
+    self:_AnchorButtonMenu(editBox, searchInfo.cursorOffsetX)
     self.buttonMenu:Show()
   else
     self.buttonMenu:Hide()
   end
 end
 
-function ChatAutocompleteIntegrator:_OnEntrySelected(editBox, entry)
-  local searchTerm, prefixText, suffixText = self:_GetEditBoxSearchTerm(editBox)
+-- Anchors the menu above the edit box, or below it if there's no room above
+function ChatAutocompleteIntegrator:_AnchorButtonMenu(editBox, cursorOffsetX)
+  local offsetX = editBox:GetTextInsets() + (cursorOffsetX or 0)
+  local offsetY = AUTOCOMPLETE_DEFAULT_Y_OFFSET or 3
+  local menuTop = ((editBox:GetTop() or 0) + self.buttonMenu:GetHeight() + offsetY) *
+                    editBox:GetEffectiveScale()
 
-  if not util.IsNilOrEmpty(searchTerm) then
-    editBox:SetText(prefixText .. entry.link .. suffixText)
-    editBox:SetCursorPosition(#prefixText + #entry.link)
+  self.buttonMenu:ClearAllPoints()
+  if menuTop > UIParent:GetTop() * UIParent:GetEffectiveScale() then
+    self.buttonMenu:SetPoint('TOPLEFT', editBox, 'BOTTOMLEFT', offsetX,
+                             editBox.autoCompleteYOffset or offsetY)
+  else
+    self.buttonMenu:SetPoint('BOTTOMLEFT', editBox, 'TOPLEFT', offsetX,
+                             editBox.autoCompleteYOffset or -offsetY)
+  end
+end
+
+function ChatAutocompleteIntegrator:_OnEntrySelected(editBox, entry)
+  if editBox == nil or entry == nil then
+    return self.buttonMenu:Hide()
+  end
+
+  local searchTerm, prefixText, suffixText = self:_GetEditBoxSearchTerm(editBox)
+  local link = self.activeCompletionSource:GetEntryLink(entry)
+
+  if not util.IsNilOrEmpty(searchTerm) and link ~= nil then
+    editBox:SetText(prefixText .. link .. suffixText)
+    editBox:SetCursorPosition(#prefixText + #link)
   end
 
   self.buttonMenu:Hide()
@@ -136,7 +197,8 @@ function ChatAutocompleteIntegrator:_OnChatTextChanged(editBox, isUserInput)
   end
 
   -- If it's potentially a secure command, abort to avoid runtime taint
-  if string.byte(editBox:GetText() or '') == string.byte('/') then
+  local text = editBox:GetText()
+  if IsSecretValue(text) or string.byte(text or '') == string.byte('/') then
     self.buttonMenu:Hide()
     return
   end
@@ -173,16 +235,43 @@ function ChatAutocompleteIntegrator:_OnKeyDownIntercept(_, key)
       self.buttonMenu:Hide()
     end,
     ['ENTER'] = function()
-      local editBox = GetCurrentKeyBoardFocus()
-      self:_OnEntrySelected(editBox, self.buttonMenu:GetSelection())
+      self:_OnEntrySelected(self.activeEditBox, self.buttonMenu:GetSelection())
     end,
   })[key]
+
+  local isPropagating = self.keyInterceptor:GetPropagateKeyboardInput()
 
   if action ~= nil then
     action()
   end
 
-  self.keyInterceptor:SetPropagateKeyboardInput(action == nil)
+  -- Since retail 10.1.5, 'SetPropagateKeyboardInput' cannot be called in
+  -- combat. The keys then reach the chat as well, thus Enter sends the message
+  -- along with the inserted link, and Escape also closes the edit box.
+  if not InCombatLockdown() then
+    self.keyInterceptor:SetPropagateKeyboardInput(action == nil)
+  elseif not isPropagating then
+    -- Combat began whilst a key was held, which would swallow every key
+    self.keyInterceptor:Hide()
+  end
+end
+
+function ChatAutocompleteIntegrator:_OnKeyUpIntercept(_, _)
+  -- Only the key being pressed should be intercepted, should combat begin
+  if not InCombatLockdown() then
+    self.keyInterceptor:SetPropagateKeyboardInput(true)
+  end
+end
+
+function ChatAutocompleteIntegrator:_OnCombatStart()
+  if not InCombatLockdown() then
+    self.keyInterceptor:SetPropagateKeyboardInput(true)
+  end
+end
+
+function ChatAutocompleteIntegrator:_OnCombatEnd()
+  self.keyInterceptor:SetPropagateKeyboardInput(true)
+  self.keyInterceptor:Show()
 end
 
 function ChatAutocompleteIntegrator:_OnChatFocusLost(_)
@@ -192,6 +281,10 @@ end
 function ChatAutocompleteIntegrator:_GetEditBoxSearchTerm(editBox)
   local cursorPosition = editBox:GetCursorPosition()
   local text = editBox:GetText()
+
+  if IsSecretValue(text) then
+    return nil, nil, nil
+  end
   local activeText = text:sub(1, cursorPosition)
   local searchTerm, startIndex = self:_ExtractSearchTerm(activeText)
 

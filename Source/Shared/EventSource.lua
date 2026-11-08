@@ -57,7 +57,13 @@ end
 ------------------------------------------
 
 function EventSource:_OnEvent(event, ...)
-  for listener, _ in pairs(self.eventListeners[event]) do
+  -- Listeners may add or remove listeners, so iterate a copy
+  local listeners = {}
+  for listener, _ in pairs(self.eventListeners[event] or {}) do
+    listeners[#listeners + 1] = listener
+  end
+
+  for _, listener in ipairs(listeners) do
     listener(...)
   end
 end

@@ -18,11 +18,13 @@ function FuzzyMatcher.New(pattern, caseInsensitive)
   local self = setmetatable({}, FuzzyMatcher)
 
   self.caseInsensitive = caseInsensitive
+  self.patternCharacters = {}
   self.patternCodePoints = {}
 
   for _, codePoint in utf8.CodePoints(pattern) do
     codePoint = caseInsensitive and utf8.ToLower(codePoint) or codePoint
     self.patternCodePoints[#self.patternCodePoints + 1] = codePoint
+    self.patternCharacters[#self.patternCharacters + 1] = utf8.Encode(codePoint)
   end
 
   return self
@@ -32,8 +34,33 @@ end
 -- Public methods
 ------------------------------------------
 
--- Cache this for performance
+-- Cache these for performance
 local lowerutf8 = utf8.ToLower
+local find = string.find
+
+-- Returns whether the pattern's characters occur in order within a string
+--
+-- This is a cheap prefilter for 'Match' which avoids decoding the string. The
+-- string must be lower case when the matcher is case-insensitive. Since UTF-8
+-- is self-synchronizing, a plain search for an encoded character can only
+-- match at a character boundary.
+function FuzzyMatcher:IsSubsequenceOf(text)
+  local patternCharacters = self.patternCharacters
+  local position = 1
+
+  for index = 1, #patternCharacters do
+    local character = patternCharacters[index]
+    local foundIndex = find(text, character, position, true)
+
+    if foundIndex == nil then
+      return false
+    end
+
+    position = foundIndex + #character
+  end
+
+  return true
+end
 
 function FuzzyMatcher:Match(codePoints)
   -- Cache as many variables as possible to improve performance

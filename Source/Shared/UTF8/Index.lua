@@ -96,7 +96,7 @@ function export.IsDigit(codePoint)
 end
 
 -- Converts a character to lower case
-function export.ToLower(input)
+local function ToLower(input)
   if input >= 65 and input <= 90 then
     return input + 32
   end
@@ -106,4 +106,38 @@ function export.ToLower(input)
   end
 
   return input
+end
+
+export.ToLower = ToLower
+
+-- Encodes a code point as an UTF-8 string
+local function Encode(codePoint)
+  if codePoint <= maxAscii then
+    return string.char(codePoint)
+  elseif codePoint < 0x800 then
+    return string.char(192 + math.floor(codePoint / 64), 128 + codePoint % 64)
+  elseif codePoint < 0x10000 then
+    return string.char(224 + math.floor(codePoint / 4096), 128 + math.floor(codePoint / 64) % 64,
+                       128 + codePoint % 64)
+  end
+
+  return string.char(240 + math.floor(codePoint / 262144), 128 + math.floor(codePoint / 4096) % 64,
+                     128 + math.floor(codePoint / 64) % 64, 128 + codePoint % 64)
+end
+
+export.Encode = Encode
+
+-- Converts an UTF-8 string to lower case
+function export.ToLowerString(text)
+  -- 'string.lower' only maps ASCII, which is all that's needed for most names
+  if not text:find('[\128-\255]') then
+    return text:lower()
+  end
+
+  local characters = {}
+  for _, codePoint in CodePoint, text, 1 do
+    characters[#characters + 1] = Encode(ToLower(codePoint))
+  end
+
+  return table.concat(characters)
 end

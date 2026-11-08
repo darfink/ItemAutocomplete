@@ -1,20 +1,26 @@
 # ItemAutocomplete
 
-This is an autocomplete addon for item links in WoW Classic. It integrates with your chat and is triggered with a single character (default <kbd>[</kbd>), making every single item in the game available with a few key strokes.
+This is an autocomplete addon for item links in World of Warcraft: Forever, retail and Classic. It integrates with your chat and is triggered with a single character (default <kbd>[</kbd>), making every single item in the game available with a few key strokes.
 
 ![In-game demo](https://i.imgur.com/H70fus7.gif)
 
 ## Compatibility
 
-| Client                          | TOC                           | Interface |
-| ------------------------------- | ----------------------------- | --------- |
+| Client                          | TOC                            | Interface |
+| ------------------------------- | ------------------------------ | --------- |
+| Forever                         | `ItemAutocomplete_Camelot.toc`  | 16001     |
+| Retail (Midnight)               | `ItemAutocomplete_Mainline.toc` | 120105    |
 | Classic Era & 20th Anniversary  | `ItemAutocomplete_Vanilla.toc` | 11509     |
 | Burning Crusade Anniversary     | `ItemAutocomplete_TBC.toc`     | 20506     |
 | Wrath Classic                   | `ItemAutocomplete_Wrath.toc`   | 30400     |
 
 ## Features
 
-- **Item database:** It automatically scans the entire item database the first time it starts up, thereafter every single item is accessible. No need to wait for you to encounter it in the world! Perhaps it's time to lookup Ashbringer or Atiesh?
+- **Item database:** It automatically scans the entire item database in the background the first time it starts up, thereafter every single item is accessible. No need to wait for you to encounter it in the world! Perhaps it's time to lookup Ashbringer or Atiesh?
+
+  Items can be searched whilst the scan is running. The server only answers so many item queries at a time, so the scan adapts to how fast it responds, pauses in combat, and resumes where it left off after a logout. On retail, the first scan covers more than 200,000 items and takes several minutes. After a patch, only new items are queried.
+
+  On Forever, roughly 12,700 items are hidden until they drop for someone on your server, and the server doesn't answer queries for them. Those can't be searched until they're revealed. They're checked again daily, and picked up right away whenever you encounter one in game.
 
 - **Chat integration:** Whilst composing a message, just input your trigger character (default <kbd>[</kbd>) and start searching for whatever item you want to link. When you've find your item, just press <kbd>↵&nbsp;Enter</kbd> to insert the link.
 
@@ -54,7 +60,7 @@ Not a keyboard person? No worries, just use the mouse.
 
 ## Commands
 
-- `/iaupdate` — Update the item database. If for some reason the item database becomes corrupt or obsolete, you can manually trigger an update with this command.
+- `/iaupdate` — Rebuild the item database. If for some reason the item database becomes corrupt or obsolete, you can manually trigger a rebuild with this command. Whilst an update is running, it reports the progress instead.
 
 ## Internationalization
 

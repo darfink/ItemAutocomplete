@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-08
+
+### Added
+
+- Compatibility with World of Warcraft: Forever (1.60.1, interface 16001)
+- Compatibility with the retail client (12.1.5, interface 120105)
+- Items can be searched whilst the item database updates, the menu displays
+  the update's progress
+- Add-on list icon
+
+### Changed
+
+- The item database is queried at the pace the server answers, rather than as
+  fast as possible. Unanswered queries are retried, and the scan pauses in
+  combat and resumes after a logout
+- Queries the server never answers (e.g. Forever's hidden items) no longer
+  hold up the scan. Such items, and items the server refuses, are queried
+  again after a patch, daily on Forever, and weekly elsewhere
+- After a patch, only items missing from the database are queried, rather than
+  rebuilding it
+- The item database is shared by every realm of a client, and stores names
+  rather than links, which shrinks the saved variables considerably
+- Searches reject non-matching items without decoding their names, and narrow
+  down the previous results whilst typing
+- Equally scored results favour the shorter name
+- The menu opens below the chat edit box when there's no room above it, and
+  stays on screen
+
+### Fixed
+
+- Keyboard navigation no longer triggers blocked action errors in combat on
+  retail, where key propagation cannot be changed in combat
+- Entering a selection without any results no longer errors
+- An item of the Wrath item ranges was never scanned
+
 ## [2.1.0] - 2026-08-15
 
 ### Added
@@ -98,7 +133,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved item query implementation, resulting in 3x faster results.
 - Changed default no. of items searched/frame from 1500 -> 2000.
 
-[unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.1.0...HEAD
+[unreleased]: https://github.com/darfink/ItemAutocomplete/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/darfink/ItemAutocomplete/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.8...v2.1.0
 [2.0.8]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.7...v2.0.8
 [2.0.7]: https://github.com/darfink/ItemAutocomplete/compare/v2.0.6...v2.0.7

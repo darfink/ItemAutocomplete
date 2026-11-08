@@ -143,40 +143,71 @@ local configDefinition = {
 
 local eventSource = EventSource.New()
 
-eventSource:AddListener('ADDON_LOADED', function(addonName)
-  if addonName ~= util.GetAddonName() then
-    return
-  end
-
+-- The bootstrap waits for login, by then the realm's season is known
+eventSource:AddListener('PLAYER_LOGIN', function()
+  local addonName = util.GetAddonName()
   local taskScheduler = TaskScheduler.New()
   local persistence = Persistence.New(addonName .. 'DB')
   local itemDatabase = ItemDatabase.New(persistence, eventSource, taskScheduler)
   local config = RegisterConfigDefinition(persistence, configDefinition)
 
-  local itemCompletionSource = CompletionSource.New(itemDatabase.methods.ItemIterator,
+  local itemCompletionSource = CompletionSource.New(itemDatabase.methods.GetSearchData,
                                                     taskScheduler, config)
 
+  function itemCompletionSource:GetEntryLink(itemId)
+    return (itemDatabase:GetItemLink(itemId))
+  end
+
   -- Override tooltip setup to provide additional item information
-  function itemCompletionSource:SetupTooltip(tooltip, entry)
-    tooltip:SetItemByID(entry.id)
+  function itemCompletionSource:SetupTooltip(tooltip, itemId)
+    tooltip:SetItemByID(itemId)
   end
 
-  local updateItemDatabase = function()
-    util.PrettyPrint('Updating item database')
-    itemDatabase:UpdateItemsAsync(function()
-      util.PrettyPrint('The database has been updated.')
+  local updateItemDatabase = function(rebuild)
+    local isStarted = itemDatabase:UpdateItemsAsync(rebuild, function(itemCount)
+      util.PrettyPrint(string.format('The item database has been updated (%d items).', itemCount))
     end)
+
+    if isStarted then
+      util.PrettyPrint('Updating the item database in the background, ' ..
+                         'items found so far can be searched meanwhile.')
+    end
   end
 
-  -- Allow users to manually update the item database
-  util.RegisterSlashCommand('iaupdate', updateItemDatabase)
+  -- Allow users to manually rebuild the item database
+  util.RegisterSlashCommand('iaupdate', function()
+    if itemDatabase:IsUpdating() then
+      util.PrettyPrint(string.format('The item database is being updated (%d%%, %d items).',
+                                     itemDatabase:GetUpdateProgress() * 100,
+                                     itemDatabase:GetItemCount()))
+    else
+      updateItemDatabase(true)
+    end
+  end)
 
   -- Bootstrapping complete - enable chat integration
-  local chatAutocompleteIntegrator = ChatAutocompleteIntegrator.New()
+  local chatAutocompleteIntegrator = ChatAutocompleteIntegrator.New(eventSource)
   chatAutocompleteIntegrator:AddCompletionSource(config.itemCompletionTrigger, itemCompletionSource)
+  chatAutocompleteIntegrator:SetStatusProvider(function()
+    if itemDatabase:IsUpdating() then
+      return string.format('Updating item database… %d%%', itemDatabase:GetUpdateProgress() * 100)
+    end
+  end)
   chatAutocompleteIntegrator:Enable()
 
-  if itemDatabase:IsEmpty() or itemDatabase:IsObsolete() then
-    C_Timer.After(5, updateItemDatabase)
+  -- Displayed links are requested on demand, update them once they arrive
+  eventSource:AddListener('GET_ITEM_INFO_RECEIVED', function(itemId)
+    chatAutocompleteIntegrator:RefreshEntry(itemId)
+  end)
+
+  if itemDatabase:IsObsolete() then
+    C_Timer.After(5, function()
+      updateItemDatabase(true)
+    end)
+  elseif itemDatabase:IsOutdated() then
+    -- Only items added by a patch, or not yet received, are queried
+    C_Timer.After(5, function()
+      updateItemDatabase(false)
+    end)
   end
 end)

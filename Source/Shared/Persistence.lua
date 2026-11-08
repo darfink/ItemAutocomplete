@@ -53,6 +53,15 @@ function Persistence:GetRealmItem(entryName, defaultValue)
   return self.persistentRealmTable.items[entryName]
 end
 
+-- Removes a persistent entry from every realm
+function Persistence:RemoveRealmItemFromAllRealms(entryName)
+  assert(entryName ~= nil)
+
+  for _, realmTable in pairs(self.persistentTable.realms) do
+    realmTable.items[entryName] = nil
+  end
+end
+
 -- Gets a persistent entry for the current character
 function Persistence:GetCharacterItem(entryName, defaultValue)
   assert(entryName ~= nil)

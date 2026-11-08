@@ -32,7 +32,11 @@ end
 
 function TaskScheduler:Enqueue(info)
   local taskId = self.taskIncrementor
-  self.tasks[taskId] = { onFinish = info.onFinish, thread = coroutine.create(info.task) }
+  self.tasks[taskId] = {
+    onError = info.onError,
+    onFinish = info.onFinish,
+    thread = coroutine.create(info.task),
+  }
 
   self.taskIncrementor = self.taskIncrementor + 1
   self.updateFrame:Show()
@@ -41,7 +45,7 @@ function TaskScheduler:Enqueue(info)
 end
 
 function TaskScheduler:Dequeue(taskId)
-  if self.tasks[taskId] == nil then
+  if taskId == nil or self.tasks[taskId] == nil then
     return false
   end
 
@@ -50,7 +54,7 @@ function TaskScheduler:Dequeue(taskId)
 end
 
 function TaskScheduler:IsScheduled(taskId)
-  return self.tasks[taskId] ~= nil
+  return taskId ~= nil and self.tasks[taskId] ~= nil
 end
 
 ------------------------------------------
@@ -58,29 +62,34 @@ end
 ------------------------------------------
 
 function TaskScheduler:_OnUpdate()
-  local activeTasks = 0
+  local finishedTasks = {}
 
   for taskId, task in pairs(self.tasks) do
     local success, result = coroutine.resume(task.thread)
 
     if coroutine.status(task.thread) == 'dead' then
       self.tasks[taskId] = nil
-
-      if not success then
-        if task.onError ~= nil then
-          task.onError(result)
-        else
-          error(result)
-        end
-      elseif task.onFinish ~= nil then
-        task.onFinish(result)
-      end
-    else
-      activeTasks = activeTasks + 1
+      finishedTasks[#finishedTasks + 1] = { task = task, success = success, result = result }
     end
   end
 
-  if activeTasks == 0 then
+  -- Callbacks run once the iteration is complete, since they may enqueue new
+  -- tasks and adding keys to a table whilst traversing it is undefined.
+  for _, finished in ipairs(finishedTasks) do
+    local task = finished.task
+
+    if not finished.success then
+      if task.onError ~= nil then
+        task.onError(finished.result)
+      else
+        geterrorhandler()(finished.result)
+      end
+    elseif task.onFinish ~= nil then
+      task.onFinish(finished.result)
+    end
+  end
+
+  if next(self.tasks) == nil then
     self.updateFrame:Hide()
   end
 end
